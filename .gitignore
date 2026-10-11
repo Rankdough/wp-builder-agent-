@@ -1,0 +1,8 @@
+.env
+runs/
+__pycache__/
+*.pyc
+.venv/
+sites/*.json
+!sites/example.json
+scripts/__pycache__/

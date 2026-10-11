@@ -1,0 +1,5 @@
+{"task": "", "feasible": true, "rung": "theme_options_or_customizer",
+ "skipped_rungs": [], "pages_affected": ["/"],
+ "changes": [{"action": "customizer_set", "setting": "et_divi[all_buttons_border_radius]", "old_value": "3", "new_value": "6", "reason": "pipeline test"}],
+ "verify": [{"page": "/", "selector": ".et_pb_button_1", "css_property": "border-radius", "expected": "6px"}],
+ "side_effects": ["Hand-written test plan; not for applying"], "blocked_reason": null}

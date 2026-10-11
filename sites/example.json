@@ -1,0 +1,31 @@
+{
+  "_about": "Site profile: learned, non-secret facts about one site. Copy to sites/<name>.json (git-ignored) and edit. Loaded into the planner and page designer as context; some commands read specific keys.",
+  "site": "https://www.example.com",
+  "platform": {
+    "wordpress": "6.x",
+    "theme": "Divi 4.27.x",
+    "page_cache": "e.g. WP Fastest Cache: cleared via its admin bar link after every change",
+    "notes": "Anything the agent should know: firewall quirks, plugins, typography filters"
+  },
+  "design_tokens": {
+    "brand_color": "#e02b20",
+    "card_surface": "#14171b",
+    "card_border": "#23272d",
+    "muted_text": "#b8bec6",
+    "content_width_px": 1120,
+    "hero_glow": {
+      "_used_by": "wpagent header-glow and page rebuilds",
+      "color": "#e02b20",
+      "opacity": 0.28,
+      "position": "top right",
+      "fade_at_percent": 55
+    }
+  },
+  "dark_header_colors": ["#000000", "#0a0a0a", "#14171b"],
+  "divi_global_colors": [],
+  "components": {
+    "rd-pills": "Text/Blurb module CSS class from assets/components.css: a bullet list renders as pills",
+    "rd-pills rd-pills--red": "Uppercase monospace tag pills",
+    "rd-steps": "Numbered list with red number circles; put an h3 + p inside each li"
+  }
+}

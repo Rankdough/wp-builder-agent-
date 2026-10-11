@@ -1,0 +1,9 @@
+/* wp-builder-agent: reusable components. Added 2026-10-09. Use via a Text module's Advanced > CSS Class.
+   rd-pills: a bullet list shows as pills. Add rd-pills--red for the red uppercase hero tags.
+   rd-steps: a numbered list shows red number circles. */
+.rd-pills ul{list-style:none;margin:0;padding:0!important;display:flex;flex-wrap:wrap;gap:8px}
+.rd-pills li{padding:6px 12px;border:1px solid #2a2f36;border-radius:999px;background:#0e1013;font-size:13px;line-height:1.4}
+.rd-pills--red li{color:#e02b20;border-color:rgba(224,43,32,.45);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.rd-steps ol{list-style:none;counter-reset:rd;margin:0;padding:0!important}
+.rd-steps li{counter-increment:rd;position:relative;padding-left:74px;min-height:56px;margin-bottom:22px}
+.rd-steps li::before{content:counter(rd);position:absolute;left:0;top:0;width:56px;height:56px;border-radius:50%;background:#e02b20;color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
