@@ -142,3 +142,31 @@ def test_customizer_preview_render_allowed():
     s.allowed_writes = frozenset()
     s._guard(route, req("POST", "/?customize_changeset_uuid=abc", "wp_customize=on"))
     assert route.result == "continued"
+
+
+def test_media_upload_only_when_planned():
+    for allowed, expected in ((set(), "aborted"), ({"media_upload"}, "continued")):
+        s, route = write_session(allowed), FakeRoute()
+        s._guard(route, req("POST", "/wp-admin/async-upload.php", "name=x.png"))
+        assert route.result == expected
+    s, route = make_session(), FakeRoute()
+    s._guard(route, req("POST", "/wp-admin/async-upload.php", "name=x.png"))
+    assert route.result == "aborted"
+
+
+def test_save_attachment_scoped_to_one_id():
+    s = write_session({"save-attachment@3910"})
+    for body, expected in (("action=save-attachment&post_id=0&id=3910&changes[alt]=x", "continued"),
+                           ("action=save-attachment&id=12&changes[alt]=x", "aborted")):
+        route = FakeRoute()
+        s._guard(route, req("POST", "/wp-admin/admin-ajax.php", body))
+        assert route.result == expected, body
+
+
+def test_quick_edit_scoped_to_one_page():
+    s = write_session({"inline-save@3907"})
+    for body, expected in (("action=inline-save&post_ID=3907&post_title=x", "continued"),
+                           ("action=inline-save&post_ID=3692&post_title=x", "aborted")):
+        route = FakeRoute()
+        s._guard(route, req("POST", "/wp-admin/admin-ajax.php", body))
+        assert route.result == expected, body

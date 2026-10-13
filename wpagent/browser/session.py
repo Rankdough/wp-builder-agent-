@@ -21,6 +21,8 @@ WRITE_HINTS = re.compile(
 SAFE_AJAX = {"heartbeat", "et_fb_update_builder_assets"}
 EXPORT_AJAX = re.compile(r"portability.*export|export.*portability", re.I)
 BLOCKED_POST_PATHS = ("/wp-admin/options.php", "/wp-admin/post.php", "/wp-admin/customize.php")
+# Media > Add New uploads each file to this endpoint; allowed only when a plan includes MEDIA_UPLOAD.
+MEDIA_UPLOAD = "media_upload"
 
 
 class LoginError(Exception):
@@ -77,7 +79,12 @@ class Session:
         body = request.post_data or ""
         if "customize_changeset_uuid" in url.query + body and "/wp-admin/" not in url.path:
             return route.continue_()  # Customizer preview render; saving only happens via customize_save
-        if url.path.startswith(BLOCKED_POST_PATHS):
+        if url.path.endswith("/wp-admin/async-upload.php"):
+            if MEDIA_UPLOAD in self.allowed_writes:
+                self.log.event("write_allowed", action=MEDIA_UPLOAD)
+                return route.continue_()
+            reason = "media upload not in plan"
+        elif url.path.startswith(BLOCKED_POST_PATHS):
             reason = "write endpoint"
         elif "/wp-json/" in url.path or "rest_route" in url.query:
             reason = "REST write"
@@ -113,8 +120,10 @@ class Session:
     @staticmethod
     def _post_id(body: str) -> str | None:
         form = parse_qs(body)
-        if form.get("post_id"):
-            return form["post_id"][0]
+        # post_id (Visual Builder), post_ID (Quick Edit), id (media save-attachment, which also sends post_id=0)
+        for key in ("post_id", "post_ID", "id"):
+            if form.get(key) and form[key][0] != "0":
+                return form[key][0]
         m = re.search(r'name="post_id"\r?\n\r?\n(\d+)', body)
         return m.group(1) if m else None
 

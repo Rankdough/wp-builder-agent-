@@ -63,3 +63,20 @@ def page_status(s: Session, page_id: int) -> dict:
     if not row.count():
         return {"id": page_id, "status": "not in drafts"}
     return {"id": page_id, "status": "draft", "title": row.locator(".row-title").inner_text()}
+
+
+def quick_edit(s: Session, page_id: int, title: str, slug: str) -> None:
+    """Pages list > Quick Edit: change a draft's title and slug (saves via admin-ajax inline-save@<id>)."""
+    s.goto("/wp-admin/edit.php?post_type=page&post_status=draft")
+    row = s.page.locator(f"#post-{page_id}")
+    row.wait_for(timeout=15_000)
+    row.hover()
+    s.log.event("click", target=".editinline", page_id=page_id, note="Quick Edit")
+    row.locator("button.editinline").click()
+    editor = s.page.locator(f"#edit-{page_id}")
+    editor.locator("input[name=post_title]").fill(title)
+    editor.locator("input[name=post_name]").fill(slug)
+    s.log.event("click", target="Quick Edit Update", page_id=page_id, title=title, slug=slug)
+    editor.locator("button.save").click()
+    s.page.locator(f"#post-{page_id} .row-title").filter(has_text=title).wait_for(timeout=30_000)
+    s.log.event("quick_edited", page_id=page_id, title=title, slug=slug)
