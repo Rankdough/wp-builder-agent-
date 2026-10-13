@@ -7,7 +7,9 @@ import re
 from html.parser import HTMLParser
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field
+
+from .components import check_classes
 
 Hex = Annotated[str, Field(pattern=r"^#[0-9a-fA-F]{6}$")]
 Px = Annotated[int, Field(ge=0, le=400)]
@@ -26,12 +28,12 @@ class Box(BaseModel):
     border_radius: Optional[Px] = None
 
 
-CssClass = Literal["rd-pills", "rd-pills rd-pills--red", "rd-steps"]
+CssClass = Annotated[str, AfterValidator(check_classes)]  # any registered rd-* component class(es)
 
 
 class TextModule(Box):
     type: Literal["text"]
-    css_class: Optional[CssClass] = Field(None, description="Site component: rd-pills (bullet list as pills), rd-steps (numbered circles)")
+    css_class: Optional[CssClass] = Field(None, description="Space-separated registered component classes, e.g. rd-kpi rd-kpi--green rd-ico-chart")
     html: str = Field(description="Only p, h1-h4, strong, em, a[href], ul, ol, li, br. No attributes except href.")
     text_color: Optional[Hex] = None
     font_size: Optional[Px] = None

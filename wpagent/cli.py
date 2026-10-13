@@ -62,6 +62,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--only", type=int, nargs="*", help="Limit to these page ids (drafts allowed)")
     p.add_argument("--confirm-site", help="Type the site name to apply on production")
 
+    p = add("components", "List registered components, or --bundle them into one Theme Options CSS block")
+    p.add_argument("--bundle", help="Write all component CSS for this site to this file (use with theme-css)")
+
     args = parser.parse_args(argv)
     try:
         site = load_site(args.site)
@@ -76,6 +79,14 @@ def main(argv: list[str] | None = None) -> int:
         from .commands import plan
         return plan.run(site, args.task, plan_file=args.plan_file, headless=args.headless)
 
+    if args.command == "components":
+        from .layout.components import bundle, catalogue
+        if args.bundle:
+            open(args.bundle, "w", encoding="utf-8").write(bundle(site.name))
+            print(f"Wrote {args.bundle}")
+        for c in catalogue():
+            print(f"{c['file']}: {' '.join(c['classes'])}")
+        return 0
     if args.command == "restyle":
         from .commands import restyle
         return restyle.run(site, args.theme, args.confirm_site, only=args.only, headless=args.headless)

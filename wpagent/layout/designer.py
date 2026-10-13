@@ -10,6 +10,8 @@ import anthropic
 from pydantic import ValidationError
 
 from ..planner.usage import record
+from .components import catalogue
+from .newcomponents import ComponentError, NewComponent, check_component, save_components
 from .spec import PageSpec, SpecError, validate_spec
 
 MODEL = "claude-opus-5-5"
@@ -36,6 +38,12 @@ Rules:
 - Use the site_profile: its design tokens, and its components. Chips/tags = a Text module with css_class
   rd-pills (or "rd-pills rd-pills--red" for red hero tags) holding a ul. Numbered steps = one Text module with
   css_class rd-steps holding an ol whose li each contain an h3 and a p. Hero glows follow design_tokens.hero_glow.
+- Components: the payload's components_catalogue lists registered component classes with usage notes. Use them
+  via css_class on Text or Blurb modules (space-separated, e.g. "rd-kpi rd-kpi--green rd-ico-chart").
+  If the design needs a visual element no component covers, define it in new_components: name (rd- + words),
+  usage, and css whose every selector starts with .<name> or .<name>--modifier. No square brackets, imports,
+  external URLs (inline data:image/svg+xml only) or fixed positioning. Prefer native settings, then existing
+  components, then a new component; never put CSS anywhere else.
 - notes: list every place the rebuild will look different from the original, briefly.
 
 Reply with one JSON object that matches the PageSpec JSON schema given. No prose, no code fences."""
@@ -59,7 +67,7 @@ def _call(client, messages, run_dir, purpose):
 
 
 def design_page(dump: dict, global_colors: list, run_dir: str | None = None, retries: int = 1,
-                profile: dict | None = None, media_base: str = "") -> PageSpec:
+                profile: dict | None = None, media_base: str = "", site: str | None = None) -> PageSpec:
     client = anthropic.Anthropic()
     payload = {
         "content_tree": [{k: v for k, v in n.items() if v not in (None, "")} for n in dump["nodes"]],
@@ -68,6 +76,7 @@ def design_page(dump: dict, global_colors: list, run_dir: str | None = None, ret
         "site_global_colors": global_colors,
         "image_src_base": media_base,
         "site_profile": profile or {},
+        "components_catalogue": catalogue(),
     }
     messages = [{"role": "user", "content":
                  "PageSpec JSON schema:\n" + json.dumps(PageSpec.model_json_schema()) +
@@ -75,10 +84,18 @@ def design_page(dump: dict, global_colors: list, run_dir: str | None = None, ret
     for attempt in range(retries + 1):
         response, text = _call(client, messages, run_dir, f"design page (attempt {attempt + 1})")
         try:
-            spec = PageSpec.model_validate_json(_extract_json(text))
+            raw = json.loads(_extract_json(text))
+            comps = [NewComponent(**c) for c in raw.pop("new_components", None) or []]
+            for c in comps:
+                check_component(c)
+            if comps:
+                if not site:
+                    raise ComponentError("new components need a site to be saved for")
+                save_components(site, comps)  # registers the classes before the spec is validated
+            spec = PageSpec.model_validate(raw)
             validate_spec(spec, media_base or None)
             return spec
-        except (ValidationError, SpecError, ValueError) as exc:
+        except (ValidationError, SpecError, ComponentError, ValueError) as exc:
             if attempt == retries:
                 raise
             messages += [{"role": "assistant", "content": response.content},

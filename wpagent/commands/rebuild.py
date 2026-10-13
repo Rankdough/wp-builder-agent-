@@ -43,7 +43,8 @@ def run(site: Site, source_path: str, draft_id: int, confirm_site: str | None, s
     if spec_file:
         spec = PageSpec.model_validate_json(Path(spec_file).read_text(encoding="utf-8"))
     else:
-        spec = design_page(dump, colors, run_dir=str(log.dir), profile=site_profile(site.name), media_base=media_base)
+        spec = design_page(dump, colors, run_dir=str(log.dir), profile=site_profile(site.name), media_base=media_base,
+                           site=site.name)
     log.write_json("spec.json", json.loads(spec.model_dump_json()))
     if not any(re.search('[‘’“”]', n.get('text') or '') for n in dump['nodes']):
         spec = straighten_quotes(spec)

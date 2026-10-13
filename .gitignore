@@ -6,3 +6,4 @@ __pycache__/
 sites/*.json
 !sites/example.json
 scripts/__pycache__/
+sites/*/
