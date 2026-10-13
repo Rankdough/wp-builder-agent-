@@ -15,19 +15,20 @@ from wpagent.layout.render import portability_json
 from wpagent.runlog import RunLog
 
 U = "https://www.rankdough.com/wp-content/uploads"
-# Display size at brand-logo scale (brand logos are 34-60px tall); width keeps each image's aspect ratio.
-AWARDS = [(f"{U}/2025/02/dma.png", "Digital Media Awards logo", 103, 44),
-          (f"{U}/2025/02/esa.png", "European Search Awards logo", 147, 44),
-          (f"{U}/2025/02/dra.png", "The Drum Awards logo", 108, 44),
-          (f"{U}/2026/08/mastering-inhouse-seo-dark-bg.png", "Mastering In-House SEO book", 127, 44)]
+# Phone display size: 38px tall (about 20% above the brand logos); width keeps each image's aspect ratio.
+AWARDS = [(f"{U}/2025/02/dma.png", "Digital Media Awards logo", 89, 38),
+          (f"{U}/2025/02/esa.png", "European Search Awards logo", 127, 38),
+          (f"{U}/2025/02/dra.png", "The Drum Awards logo", 93, 38),
+          (f"{U}/2026/08/mastering-inhouse-seo-dark-bg.png", "Mastering In-House SEO book", 110, 38)]
 FETCH = """async (id) => (await (await fetch(`/wp-json/wp/v2/pages/${id}?context=edit&_fields=status,content`,
     {headers: {'X-WP-Nonce': wpApiSettings.nonce}})).json())"""
 
 
 def logo(src, alt, w, h, hidden=False):
     aria = ' aria-hidden="true"' if hidden else ""
-    return (f'<div class="rd-logo"><img{aria} src="{src}" alt="{alt}" width="{w}" height="{h}" loading="lazy" '
-            f'style="width:{w}px;height:{h}px"></div>')
+    # Inline sizes override the shared phone rule (140px box, image scaled to 72%) for these logos only.
+    return (f'<div class="rd-logo" style="width:auto;padding:0 18px"><img{aria} src="{src}" alt="{alt}" width="{w}" '
+            f'height="{h}" loading="lazy" style="width:{w}px;height:{h}px;max-width:none;transform:none"></div>')
 
 
 def transform(raw: str) -> str:
@@ -35,14 +36,19 @@ def transform(raw: str) -> str:
     secs = [raw[a:b] for a, b in zip(starts, starts[1:] + [len(raw)])]
     i = next(k for k, s in enumerate(secs) if "Awards &amp; Recognition" in s or "Awards & Recognition" in s)
     sec = secs[i]
-    if "rd-awards-strip" in sec:
-        raise SystemExit("Awards strip already added")
+    track = "".join(logo(*a) for a in AWARDS) + "".join(logo(*a, hidden=True) for a in AWARDS)
+    if "rd-awards-strip" in sec:  # already added: resize the logos in place
+        new, n = re.subn(r'(<div class="rd-marquee rd-row1 rd-awards-strip"><div class="rd-track">).*?(</div></div>\[/et_pb_code\])',
+                         lambda m: m.group(1) + track + m.group(2), sec, flags=re.S)
+        if n != 1:
+            raise SystemExit("Awards strip found but not in the expected form")
+        secs[i] = new
+        return raw[:starts[0]] + "".join(secs)
     row_tag = re.search(r'\[et_pb_row column_structure="1_4,1_4,1_4,1_4"[^\]]*\]', sec)
     if not row_tag or "dma.png" not in sec[row_tag.end():]:
         raise SystemExit("Awards image row not found as expected")
     new_tag = row_tag.group(0)[:-1] + ' disabled_on="on|off|off"]'  # phone|tablet|desktop: hide on phone only
     row_end = sec.find("[/et_pb_row]", row_tag.end()) + len("[/et_pb_row]")
-    track = "".join(logo(*a) for a in AWARDS) + "".join(logo(*a, hidden=True) for a in AWARDS)
     strip = ('[et_pb_row admin_label="Awards strip (phone only)" disabled_on="off|on|on" _builder_version="4.27.4" '
              'custom_padding="10px||10px|||"][et_pb_column type="4_4" _builder_version="4.27.4"]'
              '[et_pb_code admin_label="Awards strip" _builder_version="4.27.4"]'
