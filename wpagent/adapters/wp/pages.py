@@ -80,3 +80,35 @@ def quick_edit(s: Session, page_id: int, title: str, slug: str) -> None:
     editor.locator("button.save").click()
     s.page.locator(f"#post-{page_id} .row-title").filter(has_text=title).wait_for(timeout=30_000)
     s.log.event("quick_edited", page_id=page_id, title=title, slug=slug)
+
+
+def set_seo_and_publish(s: Session, page_id: int, seo_title: str, meta_desc: str, keyphrase: str | None = None,
+                        publish: bool = True) -> None:
+    """Classic edit screen: type into Yoast's SEO title / meta description (and focus keyphrase), check Yoast
+    took the values, then click Publish (or Save Draft). Needs post_edit@<page_id> in the allowed writes."""
+    s.goto(f"/wp-admin/post.php?post={page_id}&action=edit")
+    s.page.wait_for_timeout(3000)
+    fields = (("#yoast-google-preview-title-metabox", "#yoast_wpseo_title", seo_title),
+              ("#yoast-google-preview-description-metabox", "#yoast_wpseo_metadesc", meta_desc))
+    for editor, hidden, value in fields:
+        box = s.page.locator(f"{editor} [contenteditable=true]").first
+        if not box.count():
+            box = s.page.locator(editor)
+        box.click()
+        s.page.keyboard.press("Control+A")
+        s.page.keyboard.press("Delete")
+        s.page.keyboard.type(value, delay=5)
+        s.page.wait_for_timeout(800)
+        got = s.page.locator(hidden).input_value()
+        if got.strip() != value:
+            raise RuntimeError(f"Yoast field {hidden} holds {got!r}, expected {value!r}")
+        s.log.event("yoast_field_set", field=hidden)
+    if keyphrase:
+        kp = s.page.locator("#focus-keyword-input-metabox")
+        kp.fill(keyphrase)
+        s.log.event("yoast_field_set", field="focus keyphrase")
+    button = "#publish" if publish else "#save-post"
+    s.log.event("click", target=button, page_id=page_id)
+    s.page.locator(button).click()
+    s.page.wait_for_url(re.compile(rf"post={page_id}.*message="), timeout=60_000)
+    s.log.event("published" if publish else "saved", page_id=page_id)

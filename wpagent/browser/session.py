@@ -84,6 +84,10 @@ class Session:
                 self.log.event("write_allowed", action=MEDIA_UPLOAD)
                 return route.continue_()
             reason = "media upload not in plan"
+        elif url.path.endswith("/wp-admin/post.php") and f"post_edit@{self._post_id(body)}" in self.allowed_writes:
+            # Classic edit screen (Update/Publish, Yoast box): allowed only for the one post in the plan.
+            self.log.event("write_allowed", action="post_edit", post_id=self._post_id(body))
+            return route.continue_()
         elif url.path.startswith(BLOCKED_POST_PATHS):
             reason = "write endpoint"
         elif "/wp-json/" in url.path or "rest_route" in url.query:

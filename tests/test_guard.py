@@ -170,3 +170,15 @@ def test_quick_edit_scoped_to_one_page():
         route = FakeRoute()
         s._guard(route, req("POST", "/wp-admin/admin-ajax.php", body))
         assert route.result == expected, body
+
+
+def test_post_edit_scoped_to_one_post():
+    s = write_session({"post_edit@3907"})
+    for body, expected in (("post_ID=3907&action=editpost&publish=Publish", "continued"),
+                           ("post_ID=3692&action=editpost", "aborted"), ("action=editpost", "aborted")):
+        route = FakeRoute()
+        s._guard(route, req("POST", "/wp-admin/post.php", body))
+        assert route.result == expected, body
+    s, route = make_session(), FakeRoute()
+    s._guard(route, req("POST", "/wp-admin/post.php", "post_ID=3907"))
+    assert route.result == "aborted"
