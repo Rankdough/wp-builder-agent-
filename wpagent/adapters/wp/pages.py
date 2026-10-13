@@ -21,11 +21,20 @@ def clone_as_draft(s: Session, page_id: int) -> int:
     s.page.click("#search-submit")
     s.page.wait_for_load_state("networkidle")
     row = s.page.locator(f"#post-{page_id}")
-    row.wait_for(timeout=15_000)
-    row.hover()
-    link = row.locator(".row-actions .edit_as_new_draft a")
-    s.log.event("click", target=".edit_as_new_draft a", page_id=page_id, note="Duplicate Post: New Draft")
-    link.click()
+    try:
+        row.wait_for(timeout=10_000)
+        row.hover()
+        link = row.locator(".row-actions .edit_as_new_draft a")
+        s.log.event("click", target=".edit_as_new_draft a", page_id=page_id, note="Duplicate Post: New Draft")
+        link.click()
+    except Exception:
+        # Not on the first page of search results: use the admin bar link on the page itself.
+        s.goto(f"/?page_id={page_id}")
+        # Top-level "Duplicate Post" item links to the same New Draft action as its "Copy to a new draft" child.
+        bar = s.page.locator(f"#wp-admin-bar-duplicate-post > a[href*='action={NEW_DRAFT}'][href*='post={page_id}&']").first
+        bar.wait_for(timeout=15_000)
+        s.log.event("click", target="admin bar 'Duplicate Post' (New Draft)", page_id=page_id, note="Duplicate Post: New Draft")
+        bar.click()
     s.page.wait_for_url(re.compile(r"post\.php\?.*post=\d+"), timeout=60_000)
     new_id = int(re.search(r"post=(\d+)", s.page.url).group(1))
     if new_id == page_id:

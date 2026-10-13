@@ -57,6 +57,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--confirm-site", help="Type the site name to apply on production")
     p.add_argument("--only", type=int, nargs="*", help="Limit to these page ids")
 
+    p = add("restyle", "Apply a colour/radius theme to Divi pages by role (dry run unless --confirm-site)")
+    p.add_argument("--theme", required=True, help="Theme name, e.g. navy-red")
+    p.add_argument("--only", type=int, nargs="*", help="Limit to these page ids (drafts allowed)")
+    p.add_argument("--confirm-site", help="Type the site name to apply on production")
+
     args = parser.parse_args(argv)
     try:
         site = load_site(args.site)
@@ -71,6 +76,9 @@ def main(argv: list[str] | None = None) -> int:
         from .commands import plan
         return plan.run(site, args.task, plan_file=args.plan_file, headless=args.headless)
 
+    if args.command == "restyle":
+        from .commands import restyle
+        return restyle.run(site, args.theme, args.confirm_site, only=args.only, headless=args.headless)
     if args.command == "header-glow":
         from .commands import header_glow
         return header_glow.run(site, args.confirm_site, only=args.only, headless=args.headless)

@@ -1,9 +1,14 @@
-/* wp-builder-agent: reusable components. Added 2026-10-09. Use via a Text module's Advanced > CSS Class.
-   rd-pills: a bullet list shows as pills. Add rd-pills--red for the red uppercase hero tags.
-   rd-steps: a numbered list shows red number circles. */
+/* wp-builder-agent: reusable components v2 (dashboard style). Use via a Text module's Advanced > CSS Class.
+   rd-pills: a bullet list renders as tinted badges. Colour variants: rd-pills--red, --amber, --purple, --green, --blue.
+   rd-steps: a numbered list renders with tinted number circles; put an h3 + p inside each li. */
 .rd-pills ul{list-style:none;margin:0;padding:0!important;display:flex;flex-wrap:wrap;gap:8px}
-.rd-pills li{padding:6px 12px;border:1px solid #2a2f36;border-radius:999px;background:#0e1013;font-size:13px;line-height:1.4}
-.rd-pills--red li{color:#e02b20;border-color:rgba(224,43,32,.45);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.rd-pills li{padding:4px 10px;border:1px solid #1e3350;border-radius:6px;background:rgba(148,163,184,.08);color:#cbd5e1;font-size:13px;line-height:1.4}
+.rd-pills--red li{color:#f87171;background:rgba(224,43,32,.12);border-color:rgba(224,43,32,.45);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.rd-pills--amber li{color:#fbbf24;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.45)}
+.rd-pills--purple li{color:#c4b5fd;background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.45)}
+.rd-pills--green li{color:#4ade80;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.45)}
+.rd-pills--blue li{color:#93c5fd;background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.45)}
 .rd-steps ol{list-style:none;counter-reset:rd;margin:0;padding:0!important}
-.rd-steps li{counter-increment:rd;position:relative;padding-left:74px;min-height:56px;margin-bottom:22px}
-.rd-steps li::before{content:counter(rd);position:absolute;left:0;top:0;width:56px;height:56px;border-radius:50%;background:#e02b20;color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
+.rd-steps li{counter-increment:rd;position:relative;padding-left:64px;min-height:44px;margin-bottom:22px}
+.rd-steps li::before{content:counter(rd);position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:rgba(224,43,32,.16);border:1px solid rgba(224,43,32,.45);color:#f87171;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+/* end wp-builder-agent components */
