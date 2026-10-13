@@ -8,6 +8,7 @@
 .rd-kpi:hover,.rd-panel:hover{border-color:#334155}
 .rd-kpi h4,.rd-panel h4{padding:0!important}
 .rd-kpi h4{font-size:12px!important;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#94a3b8;margin:0 28px 6px 0}
+.rd-kpi h4 a{color:inherit;text-decoration:none}.rd-kpi h4 a:hover{text-decoration:underline}
 .rd-kpi p{margin:0;padding:0!important;font-size:13px;line-height:1.5;color:#94a3b8}
 .rd-kpi p:first-of-type strong{display:block;font-size:40px;line-height:1.1;font-weight:800;color:#fff;margin:6px 0 10px}
 .rd-kpi p:nth-of-type(2){font-family:'IBM Plex Mono',ui-monospace,monospace;color:#cbd5e1}
