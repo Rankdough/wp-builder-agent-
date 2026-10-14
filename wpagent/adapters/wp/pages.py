@@ -112,3 +112,31 @@ def set_seo_and_publish(s: Session, page_id: int, seo_title: str, meta_desc: str
     s.page.locator(button).click()
     s.page.wait_for_url(re.compile(rf"post={page_id}.*message="), timeout=60_000)
     s.log.event("published" if publish else "saved", page_id=page_id)
+
+
+def create_draft_page(s: Session, title: str, content: str) -> int:
+    """Pages > Add New (classic editor): type the title, paste the content into the Text tab, click Save Draft.
+    The new page's id is read from the screen first and is the only post this session may save."""
+    s.goto("/wp-admin/post-new.php?post_type=page")
+    page_id = int(s.page.locator("#post_ID").input_value())
+    s.allowed_writes = s.allowed_writes | {f"post_edit@{page_id}"}
+    s.page.locator("#title").fill(title)
+    if s.page.locator("#content-html").count():
+        s.log.event("click", target="#content-html", note="editor Text tab")
+        s.page.locator("#content-html").click()
+    s.page.locator("textarea#content").fill(content)
+    s.log.event("click", target="#save-post", page_id=page_id, note="Save Draft")
+    s.page.locator("#save-post").click()
+    try:
+        s.page.wait_for_url(re.compile(rf"post={page_id}.*message="), timeout=60_000)
+    except Exception:
+        # Seen on rankdough.com (Divi 4.27.4): WordPress autosaved the new page and the Save Draft click sent no
+        # request. Accept it only if the page really is a draft holding the content; otherwise fail loudly.
+        resp = s.context.request.get(f"{s.site.url}/wp-json/wp/v2/pages/{page_id}?context=edit&_fields=status,content",
+                                     headers={"X-WP-Nonce": s.page.evaluate("wpApiSettings.nonce")})
+        saved = resp.json() if resp.ok else {}
+        if saved.get("status") != "draft" or len(saved.get("content", {}).get("raw", "")) != len(content):
+            raise RuntimeError(f"Save Draft did not complete for page {page_id}: HTTP {resp.status}, {str(saved)[:200]}")
+        s.log.event("saved_by_autosave", page_id=page_id)
+    s.log.event("draft_created", page_id=page_id)
+    return page_id
