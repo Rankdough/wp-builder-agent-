@@ -140,3 +140,25 @@ def create_draft_page(s: Session, title: str, content: str) -> int:
         s.log.event("saved_by_autosave", page_id=page_id)
     s.log.event("draft_created", page_id=page_id)
     return page_id
+
+
+def enable_divi_builder(s: Session, page_id: int) -> None:
+    """Edit screen > 'Use The Divi Builder'. On Divi 4.27 the click saves the page itself (one post.php request) and
+    moves on to the builder. Needs post_edit@<page_id>. Checks the page's builder flag afterwards."""
+    def flag() -> str:
+        resp = s.context.request.get(f"{s.site.url}/wp-json/wp/v2/pages/{page_id}?context=edit&_fields=meta,status",
+                                     headers={"X-WP-Nonce": s.page.evaluate("wpApiSettings.nonce")})
+        return (resp.json().get("meta") or {}).get("_et_pb_use_builder", "")
+
+    s.goto(f"/wp-admin/post.php?post={page_id}&action=edit")
+    s.page.wait_for_timeout(2000)
+    if flag() == "on":
+        return
+    s.log.event("click", target="#et_pb_toggle_builder", page_id=page_id, note="Use The Divi Builder")
+    s.page.locator("#et_pb_toggle_builder").click()
+    s.page.wait_for_load_state("load", timeout=60_000)
+    s.page.wait_for_timeout(4000)
+    s.goto("/wp-admin/")
+    if flag() != "on":
+        raise RuntimeError(f"Divi builder did not switch on for page {page_id}")
+    s.log.event("divi_builder_enabled", page_id=page_id)

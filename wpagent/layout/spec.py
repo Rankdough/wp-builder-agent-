@@ -200,7 +200,7 @@ def validate_spec(spec: PageSpec, media_base: str | None = None) -> None:
                             if re.search(r"[<>\[\]]", t):
                                 raise SpecError(f"{where}: title contains markup")
                     elif m.type == "button":
-                        if re.search(r"[<>\[\]\"]", m.text) or not re.match(r"^(https?://|#|/)", m.url):
+                        if re.search(r"[<>\[\]\"]", m.text) or not re.match(r"^(https?://|#|/|mailto:[^\s<>\"]+$)", m.url):
                             raise SpecError(f"{where}: bad button text or url")
                     elif m.type == "image":
                         if not m.src.startswith(media_base or "https://"):

@@ -129,3 +129,16 @@ def test_missing_text_detects_dropped_words():
                                          "<p>Get the code from <a href='https://x.com'>GitHub</a>. It is free under the MIT licence.</p>"})
     assert missing_text(src, full) == []
     assert missing_text(src, cut) == ["The connectors we tried needed paid plans or never finished authorising."]
+
+
+def test_button_url_schemes():
+    import pytest
+    from wpagent.layout.spec import PageSpec, SpecError, validate_spec
+
+    def spec(url):
+        return PageSpec.model_validate({"sections": [{"admin_label": "s", "rows": [{"structure": "4_4", "columns": [
+            {"modules": [{"type": "button", "text": "Email us", "url": url}]}]}]}]})
+    validate_spec(spec("mailto:info@example.com?subject=Hi%20there"))
+    for bad in ("javascript:alert(1)", "mailto:a b", "data:text/html,x"):
+        with pytest.raises(SpecError):
+            validate_spec(spec(bad))
