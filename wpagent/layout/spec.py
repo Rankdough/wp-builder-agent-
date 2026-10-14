@@ -154,7 +154,9 @@ def straighten_quotes(spec: PageSpec) -> PageSpec:
     return PageSpec.model_validate(walk(spec.model_dump()))
 
 
-ALLOWED_TAGS = {"p", "h1", "h2", "h3", "h4", "strong", "em", "a", "ul", "ol", "li", "br"}
+ALLOWED_TAGS = {"p", "h1", "h2", "h3", "h4", "strong", "em", "a", "ul", "ol", "li", "br", "span"}
+# The one inline style allowed: a text colour on a span, what Divi's text editor writes when you colour a word.
+SPAN_COLOUR = re.compile(r"^color:\s*#[0-9a-fA-F]{6};?$")
 
 
 class _Checker(HTMLParser):
@@ -166,6 +168,8 @@ class _Checker(HTMLParser):
         if tag not in ALLOWED_TAGS:
             self.errors.append(f"tag <{tag}> not allowed")
         for k, v in attrs:
+            if tag == "span" and k == "style" and SPAN_COLOUR.match((v or "").strip()):
+                continue
             if not (tag == "a" and k in ("href", "target", "rel")):
                 self.errors.append(f"attribute {k}= on <{tag}> not allowed")
             if k == "href" and v and v.strip().lower().startswith("javascript:"):

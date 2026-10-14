@@ -142,3 +142,13 @@ def test_button_url_schemes():
     for bad in ("javascript:alert(1)", "mailto:a b", "data:text/html,x"):
         with pytest.raises(SpecError):
             validate_spec(spec(bad))
+
+
+def test_span_colour_only():
+    import pytest
+    from wpagent.layout.spec import SpecError, check_html
+    check_html('<h1>Get <span style="color:#3c83f6">cited</span></h1>', "t")
+    for bad in ('<span style="color:red">x</span>', '<span style="color:#3c83f6;background:url(x)">x</span>',
+                '<span class="x">x</span>', '<span style="position:fixed">x</span>'):
+        with pytest.raises(SpecError):
+            check_html(bad, "t")

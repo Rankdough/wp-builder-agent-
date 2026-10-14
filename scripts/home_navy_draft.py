@@ -26,8 +26,9 @@ def text(html, **kw):
     return {"type": "text", "html": html, "heading_color": FG, **kw}
 
 
-def card(html, bg=CARD, pad=28):
-    return {"modules": [text(html, text_color=MUTED, font_size=15, h3_size=20, background_color=bg,
+def card(html, bg=CARD, pad=28, css_class=None):
+    extra = {"css_class": css_class} if css_class else {}
+    return {"modules": [text(html, **extra, text_color=MUTED, font_size=15, h3_size=20, background_color=bg,
                              border_width=1, border_color=BORDER, border_style="solid", border_radius=12,
                              padding=[pad, pad, pad, pad])]}
 
@@ -42,14 +43,14 @@ SPEC = {"sections": [
     {"admin_label": "Hero", "background_color": NAVY, "padding_top": 96, "padding_bottom": 80,
      "glow": {"color": BLUE, "opacity": 0.18, "position": "top right", "fade_at_percent": 60},
      "rows": [{"structure": "4_4", "max_width": W, "columns": [{"modules": [
-         text("<p><strong>SEO + AI search</strong></p>", text_color=BLUE, font_size=13, margin_bottom=12),
-         text("<h1>Rank in Google. Get cited by AI.</h1>", h1_size=64, margin_bottom=16),
+         text("<ul><li>SEO + AI search</li></ul>", css_class="rd-pills", text_color=MUTED, font_size=13, margin_bottom=16),
+         text(f'<h1>Rank in Google. Get <span style="color:{BLUE}">cited</span> by AI.</h1>', h1_size=64, margin_bottom=16),
          text("<p>Rankdough fixes the technical issues, builds the content and shapes the answers that search "
               "engines and AI assistants pick up. Clear scope. Measured results.</p>",
               text_color=MUTED, font_size=18, margin_bottom=24),
          {**BTN, "text": "Get a free site snapshot", "url": "#contact", "text_color": "#ffffff", "bg_color": BLUE,
           "border_width": 0},
-         {**BTN, "text": "See services", "url": "#services", "text_color": FG, "border_color": BORDER,
+         {**BTN, "text": "See services", "url": "#services", "text_color": FG, "border_color": "#475569",
           "border_width": 1}]}]}]},
     {"admin_label": "Stats (placeholders)", "background_color": CARD, "padding_top": 28, "padding_bottom": 28,
      "rows": [{"structure": "1_3,1_3,1_3", "max_width": W, "columns": [
@@ -64,14 +65,14 @@ SPEC = {"sections": [
          heading("What we do", "Three services. Each one ties to a number you can track."),
          {"structure": "1_3,1_3,1_3", "max_width": W, "gutter": 2, "equal_heights": True, "padding": [20, 0, 0, 0],
           "columns": [
-              card("<p><strong>Foundation</strong></p><h3>Technical SEO audit</h3><p>Crawl, index, speed and "
-                   "structure checked against real data. You get a ranked fix list, not a 90-page PDF.</p>"),
-              card('<p><strong>Growth</strong></p><h3><a href="/content-that-gets-cited/">Content and SEO '
+              card("<ul><li>Foundation</li></ul><h3>Technical SEO audit</h3><p>Crawl, index, speed and "
+                   "structure checked against real data. You get a ranked fix list, not a 90-page PDF.</p>", css_class="rd-pills"),
+              card('<ul><li>Growth</li></ul><h3><a href="/content-that-gets-cited/">Content and SEO '
                    "strategy</a></h3><p>Keyword research, topic maps and briefs built around what your buyers "
-                   "search. Every page has a job.</p>"),
-              card('<p><strong>Next</strong></p><h3><a href="/ai-visibility-programme/">AI search (AEO)</a></h3>'
+                   "search. Every page has a job.</p>", css_class="rd-pills"),
+              card('<ul><li>Next</li></ul><h3><a href="/ai-visibility-programme/">AI search (AEO)</a></h3>'
                    "<p>Structured data, entity clarity and answer-ready content so ChatGPT, Gemini and Perplexity "
-                   "can cite you.</p>")]}]},
+                   "can cite you.</p>", css_class="rd-pills")]}]},
     {"admin_label": "How it works", "css_id": "process", "background_color": NAVY, "padding_top": 88,
      "padding_bottom": 88, "rows": [
          heading("How it works", "Four steps. No lock-in."),
