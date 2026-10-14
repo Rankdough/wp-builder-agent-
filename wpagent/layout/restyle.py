@@ -96,3 +96,65 @@ NAVY_RED = {
     "button": {"button_border_radius": "8px"},
 }
 THEMES = {"navy-red": NAVY_RED}
+
+
+# Navy palette from the Oct 2026 home brief (Rankdough/fetch-and-smile, rankdough-home): navy page, navy cards,
+# slate borders and text, blue accent in place of red.
+N_PAGE, N_ALT, N_CARD, N_LINE, N_BLUE, N_MUTED, N_BODY = ("#070c18", "#0a2542", "#0f1729", "#1d283a", "#3c83f6",
+                                                          "#94a3b8", "#cbd5e1")
+NAVY_BLUE = {
+    "background": {"#000000": N_PAGE, "#0b0d10": N_ALT, "#14171b": N_CARD},
+    "button_bg": {"#e02b20": N_BLUE},
+    "border": {"#23272d": N_LINE, "#2c3036": N_LINE, "#000000": N_PAGE},
+    "text": {"#b8bec6": N_MUTED, "#d4d8dd": N_BODY},
+    "shadow": {"#000000": N_PAGE},
+    "gradient": {"rgba(224,43,32,0.28)": "rgba(60,131,246,0.28)"},
+    # Colours inside existing Code module CSS (<style> blocks and style="" attributes): values only.
+    "code_css": {"#e02b20": N_BLUE, "#14171b": N_CARD, "#23272d": N_LINE, "#2c3036": N_LINE, "#0b0d10": N_PAGE,
+                 "#b8bec6": N_MUTED, "#d4d8dd": N_BODY},
+}
+THEMES["navy-blue"] = NAVY_BLUE
+
+CODE = re.compile(r"(\[et_pb_code[^\]]*\])(.*?)(\[/et_pb_code\])", re.S)
+HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
+
+
+def swap_code_colours(raw: str, mapping: dict) -> tuple[str, int]:
+    """Change colour values inside Code modules' <style> blocks and style="" attributes only. Text is untouched."""
+    n = 0
+
+    def css(s: str) -> str:
+        nonlocal n
+
+        def one(m: re.Match) -> str:
+            nonlocal n
+            new = mapping.get(m.group(0).lower())
+            if new:
+                n += 1
+                return new
+            return m.group(0)
+        return HEX.sub(one, s)
+
+    def module(m: re.Match) -> str:
+        body = re.sub(r"(<style[^>]*>)(.*?)(</style>)", lambda s: s.group(1) + css(s.group(2)) + s.group(3), m.group(2),
+                      flags=re.S)
+        body = re.sub(r'(style=")([^"]*)(")', lambda s: s.group(1) + css(s.group(2)) + s.group(3), body)
+        return m.group(1) + body + m.group(3)
+
+    return CODE.sub(module, raw), n
+
+
+def swap_gradients(raw: str, mapping: dict) -> tuple[str, int]:
+    n = 0
+    for old, new in mapping.items():
+        n += raw.count(old)
+        raw = raw.replace(old, new)
+    return raw, n
+
+
+def visible_text(raw: str) -> str:
+    """Words a visitor reads: shortcode tags, <style> blocks and HTML tags removed."""
+    t = re.sub(r"<style.*?</style>", " ", raw, flags=re.S)
+    t = re.sub(r"\[/?et_pb_[^\]]*\]", " ", t)
+    t = re.sub(r"<[^>]+>", " ", t)
+    return " ".join(t.split())
