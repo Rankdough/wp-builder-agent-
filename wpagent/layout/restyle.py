@@ -105,7 +105,7 @@ N_PAGE, N_ALT, N_CARD, N_LINE, N_BLUE, N_MUTED, N_BODY = ("#070c18", "#0a2542", 
 NAVY_BLUE = {
     "background": {"#000000": N_PAGE, "#0b0d10": N_ALT, "#14171b": N_CARD},
     "button_bg": {"#e02b20": N_BLUE},
-    "border": {"#23272d": N_LINE, "#2c3036": N_LINE, "#000000": N_PAGE},
+    "border": {"#23272d": N_LINE, "#2c3036": N_LINE, "#000000": N_PAGE, "#f57600": N_BLUE},
     "text": {"#b8bec6": N_MUTED, "#d4d8dd": N_BODY},
     "shadow": {"#000000": N_PAGE},
     "gradient": {"rgba(224,43,32,0.28)": "rgba(60,131,246,0.28)"},
