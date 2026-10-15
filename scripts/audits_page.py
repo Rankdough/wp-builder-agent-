@@ -23,54 +23,57 @@ SHOTS = {
     "checklist": (ROOT / "runs" / "lp" / "seo-audit-checklist-example.png",
                   "Example technical SEO audit checklist: crawling, rendering, indexing, site architecture, "
                   "international SEO, backlinks and e-commerce, each with checks marked OK, to fix or to find out"),
-    "actions": (ROOT / "runs" / "lp" / "seo-audit-actions-example.png",
-                "Example technical SEO audit action list: checks, critical and high priority fixes, and the top "
-                "actions ranked by priority"),
+    "content": (ROOT / "runs" / "lp" / "content-audit-example.png",
+                "Example content audit: pages scored on Search Console data with keep, improve, merge or remove "
+                "verdicts"),
 }
 V = '_builder_version="4.27.4" _module_preset="default" global_colors_info="{}" theme_builder_area="post_content"'
 SECTIONS = {
-    "included": {
-        "h2": "What Is Included In Your Site SEO Audit",
-        "intro": "We check your site the way Google and AI assistants see it. Over 250 checks in 16 areas, each one "
-                 "marked OK, to fix or to find out.",
-        "card": "Tools we use", "card_p": "Real data from your site, not a generic report.",
-        "pills": ["Google Search Console", "Screaming Frog crawl", "Ahrefs", "PageSpeed Insights",
-                  "Rich Results Test", "Desktop and mobile checks"],
+    "technical": {
+        "h2": "Technical SEO Audit: Fix What Holds Your Site Back",
+        "intro": "Content and links do little for pages Google can't crawl, index or trust. We run over 250 checks "
+                 "across 16 areas on your Search Console data, a full crawl, Ahrefs and the site itself, then rank "
+                 "every fix by what it's worth to your traffic and sales.",
+        "card": "What you get", "card_p": "Everything your developers need to start fixing straight away.",
+        "pills": ["250+ point checklist", "Fix list ranked critical first", "Example URLs for every issue",
+                  "Traffic linked to each issue", "Effort and owner for every fix", "AI crawler access check",
+                  "Recorded video walkthrough", "Live tracker as fixes go live"],
         "steps": [
-            ("Crawling and indexing", "robots.txt, XML sitemaps, redirects, canonicals and Search Console coverage. "
-             "Can Google find your pages and keep them?"),
-            ("Rendering and user experience", "Navigation and content in the raw HTML, mobile layout, forms and "
-             "page speed."),
-            ("Site architecture and international SEO", "Click depth to the pages that earn money, breadcrumbs, "
-             "internal links, subdomains and hreflang."),
-            ("Rankings and on-page", "Titles, headings, duplicate pages, schema and how your brand shows on Google "
-             "and Maps."),
-            ("Backlinks and negative practices", "Broken and spammy backlinks, hidden text, cloaking and doorway "
-             "pages."),
-            ("E-commerce and content", "Category and product pages, reviews, faceted navigation, and thin or "
-             "duplicate content."),
+            ("Google finds and keeps your money pages", "We check robots.txt, sitemaps, redirects and Search Console "
+             "coverage, so the pages that sell get crawled and indexed instead of junk URLs."),
+            ("Visitors and Google see the same site", "Navigation and content load in the raw HTML, pages work on "
+             "mobile, and forms don't lose leads."),
+            ("Authority flows to the pages that sell", "Short click paths, breadcrumbs and internal links point "
+             "Google at your key pages, in every country you sell to."),
+            ("More from the rankings you already have", "Clear titles and headings, no duplicate pages, working "
+             "schema, and a brand that shows properly on Google and Maps."),
+            ("Protect the rankings you've built", "Broken and spammy backlinks, hidden text and cloaking can cost "
+             "you rankings. We find them and fix the ones that matter."),
+            ("Shop pages that rank and sell", "Category and product pages with reviews, clean filters and unique "
+             "copy, so shoppers land where they can buy."),
         ],
     },
-    "why": {
-        "h2": "Why Your Site Needs a Technical SEO Audit",
-        "intro": "Content and links do little for pages Google can't crawl, index or trust. Our audit finds what "
-                 "holds your site back, then puts every fix in the order that brings traffic and sales back first.",
-        "card": "What you get", "card_p": "One dashboard you can share with your developers.",
-        "pills": ["250+ point checklist", "Prioritised action list", "Example URLs for every issue",
-                  "Search Console and crawl data", "AI crawler checks", "Video walkthrough", "Live project tracker"],
+    "content": {
+        "h2": "Content Audit: Make Every Page Earn Its Place",
+        "intro": "Technical fixes let Google read your site. The content audit tells you which pages bring in "
+                 "traffic, which to improve, which to merge or remove, and what to write next.",
+        "card": "What you get", "card_p": "A clear verdict and next step for every page on your site.",
+        "pills": ["Verdict for every page", "Search Console data per page", "Pages close to page one",
+                  "Merge plan for competing pages", "Content gaps vs competitors", "Internal linking plan",
+                  "Topics to write next", "Recorded video walkthrough"],
         "steps": [
-            ("Evidence for every finding", "We work from your Search Console data, a full site crawl, Ahrefs and a "
-             "page-by-page check in the browser. Each issue comes with example URLs and the traffic it touches."),
-            ("Fixes ranked by what they're worth", "Every action gets a priority from critical to nice to have, with "
-             "effort, impact and an owner: your team or ours."),
-            ("Critical issues first", "Critical means it blocks crawling, indexing or the pages that earn money. "
-             "Those get fixed before anything cosmetic."),
-            ("Ready for Google and AI search", "We check that Google and AI crawlers like GPTBot and ClaudeBot can "
-             "reach your pages, that key content sits in the raw HTML, and that your schema works."),
-            ("Clear tasks your developers can act on", "Each action says what to change, why it matters and where, "
-             "with the evidence attached. No 90-page PDF."),
-            ("A walkthrough, then a live tracker", "You get a short summary of the critical issues and a recorded "
-             "video walkthrough. The action list then becomes the tracker we work from as fixes go live."),
+            ("Know which pages earn and which don't", "Every page scored on clicks, impressions and position from "
+             "Search Console, then marked keep, improve, merge or remove."),
+            ("Quick wins from pages close to page one", "Pages sitting in positions 5 to 15 get specific fixes "
+             "first. They usually move fastest."),
+            ("Pages that match what buyers search", "Each key page is checked against what Google ranks for its "
+             "main search: format, depth and the questions buyers ask."),
+            ("Stop your pages competing with each other", "Thin, duplicate and outdated pages are flagged, with the "
+             "page to merge them into or update."),
+            ("Win the topics your competitors own", "We list the topics rivals rank for that you don't cover yet, "
+             "and link them to the pages that sell."),
+            ("Get quoted by AI assistants", "Answers near the top, facts in plain text and named sources make your "
+             "pages easier for ChatGPT and Google's AI answers to quote."),
         ],
     },
 }
@@ -84,7 +87,7 @@ def section(key, img_src, img_alt, image_left):
         f'[et_pb_text {V} text_text_color="#b8bec6" text_font_size="18px" text_line_height="1.65em" '
         f'header_2_text_color="#ffffff" custom_margin="||24px||false|false"]<h2>{c["h2"]}</h2><p>{c["intro"]}</p>'
         "[/et_pb_text]"
-        f'[et_pb_blurb title="{c["card"]}" module_class="rd-pills" {V} header_level="h3" header_text_color="#ffffff" '
+        f'[et_pb_blurb title="{c["card"]}" module_class="rd-pills rd-pills--lg" {V} header_level="h3" header_text_color="#ffffff" '
         f'header_font_size="20px" body_text_color="#d4d8dd" body_font_size="17px" background_color="#14171b" '
         f'custom_margin="||24px||false|false" custom_padding="28px|28px|28px|28px|false|false" '
         f'border_radii="on|16px|16px|16px|16px" border_width_all="1px" border_color_all="#23272d" '
@@ -105,7 +108,7 @@ def section(key, img_src, img_alt, image_left):
                  f'text_font_size="16px" header_3_text_color="#ffffff" header_3_font_size="19px"]'
                  f"<ol{reset}>{items}</ol>[/et_pb_text][/et_pb_column]")
     steps = f'[et_pb_row column_structure="1_3,1_3,1_3" {V} custom_padding="20px||0px|||"]{cols}[/et_pb_row]'
-    label = "Audit: what is included" if key == "included" else "Audit: why it matters"
+    label = "Audit: technical" if key == "technical" else "Audit: content"
     return (f'[et_pb_section fb_built="1" admin_label="{label}" {V} background_color="#000000" '
             f'custom_padding="70px||70px|||"]{top}{steps}[/et_pb_section]')
 
@@ -115,14 +118,15 @@ def sections(raw):
     return list(zip(starts, starts[1:] + [len(raw)]))
 
 
-def transform(raw, checklist_src, actions_src):
+def transform(raw, checklist_src, content_src):
     secs = sections(raw)
     first = [(a, b) for a, b in secs if any(n in raw[a:b] for n in OLD_IMGS)]
     if len(first) != 1:
         raise SystemExit(f"Expected one 'what is included' image section, found {len(first)}")
-    second = [(a, b) for a, b in secs if "Why Your Site Needs a Technical SEO Audit" in raw[a:b]]
-    both = (section("included", checklist_src, SHOTS["checklist"][1], image_left=True) +
-            section("why", actions_src, SHOTS["actions"][1], image_left=False))
+    second = [(a, b) for a, b in secs if any(k in raw[a:b] for k in (
+        "Why Your Site Needs a Technical SEO Audit", 'admin_label="Audit: why it matters"', 'admin_label="Audit: content"'))]
+    both = (section("technical", checklist_src, SHOTS["checklist"][1], image_left=True) +
+            section("content", content_src, SHOTS["content"][1], image_left=False))
     a1, b1 = first[0]
     if second:
         a2, b2 = second[0]
@@ -160,7 +164,7 @@ with sync_playwright() as pw:
             for k, m in media.items():
                 s.allowed_writes = s.allowed_writes | {f"save-attachment@{m['id']}"}
                 set_alt_text(s, m["id"], SHOTS[k][1])
-            new = transform(raw, media["checklist"]["source_url"], media["actions"]["source_url"])
+            new = transform(raw, media["checklist"]["source_url"], media["content"]["source_url"])
             (log.dir / f"{page_id}-after.txt").write_text(new, encoding="utf-8")
             f = log.dir / "import.json"
             f.write_text(portability_json(new, page_id, global_colors(site.name)), encoding="utf-8")
