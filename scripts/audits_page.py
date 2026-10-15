@@ -105,7 +105,7 @@ OUTCOMES = [
 
 def blurb(icon, title, body_html, place="top", card=True, title_size=19, extra=""):
     return (f'[et_pb_blurb title="{html.escape(title, quote=True)}" image="{icon}" alt="" use_icon="off" '
-            f'icon_placement="{place}" image_icon_width="56px" icon_alignment="left" text_orientation="left" {V} header_level="h3" '
+            f'icon_placement="{place}" image_icon_width="64px" icon_alignment="left" text_orientation="left" {V} header_level="h3" '
             f'header_text_color="#ffffff" header_font_size="{title_size}px" header_line_height="1.3em" '
             f'body_text_color="#b8bec6" body_font_size="15px" body_line_height="1.7em" '
             f'{CARD if card else ""} {extra}]{body_html}[/et_pb_blurb]')
@@ -120,8 +120,9 @@ def heading_row(h2):
 def card_rows(cards, icons):
     out = ""
     for i in (0, 3):
-        cols = "".join(f'[et_pb_column type="1_3" {V}]{blurb(icons[ic], t, f"<p>{b}</p>")}[/et_pb_column]'
-                       for ic, t, b in cards[i:i + 3])
+        # Card styling sits on the column so the row's equal heights evens the boxes out.
+        cols = "".join(f'[et_pb_column type="1_3" {V} {CARD}]{blurb(icons[ic], t, f"<p>{b}</p>", card=False)}'
+                       "[/et_pb_column]" for ic, t, b in cards[i:i + 3])
         out += (f'[et_pb_row column_structure="1_3,1_3,1_3" use_custom_gutter="on" gutter_width="2" make_equal="on" '
                 f'{V} custom_padding="8px||8px|||"]{cols}[/et_pb_row]')
     return out
@@ -188,7 +189,8 @@ def who_row(raw, icons):
     cards = []
     for ic, (t, body) in zip(("growth", "target", "search"), zip(texts[0::2], texts[1::2])):
         title = html.unescape(re.sub(r"<[^>]+>", "", t)).replace("✔", "").strip()
-        cards.append(f'[et_pb_column type="1_3" {V}]{blurb(icons[ic], title, body.strip())}[/et_pb_column]')
+        cards.append(f'[et_pb_column type="1_3" {V} {CARD}]{blurb(icons[ic], title, body.strip(), card=False)}'
+                     "[/et_pb_column]")
     row = (f'[et_pb_row column_structure="1_3,1_3,1_3" use_custom_gutter="on" gutter_width="2" make_equal="on" '
            f'{V}]{"".join(cards)}[/et_pb_row]')
     return raw[:a] + row + raw[b:]
@@ -249,7 +251,7 @@ with sync_playwright() as pw:
         raw = page["content"]["raw"]
         (log.backup / f"{page_id}-before.txt").write_text(raw, encoding="utf-8")
         if not live:
-            fake = {n: f"{site.url}/wp-content/uploads/YYYY/MM/audit-icon-{n}.png" for n in ICONS}
+            fake = {n: f"{site.url}/wp-content/uploads/YYYY/MM/audit-icon2-{n}.png" for n in ICONS}
             new = transform(raw, fake["growth"], fake["link"], fake)
             print(f"Dry run ({page['status']}): {len(raw)} -> {len(new)} chars. Nothing written.")
         else:
@@ -257,7 +259,7 @@ with sync_playwright() as pw:
             for k, m in media.items():
                 s.allowed_writes = s.allowed_writes | {f"save-attachment@{m['id']}"}
                 set_alt_text(s, m["id"], SHOTS[k][1])
-            icons = {n: upload_image(s, LP / "icons" / f"audit-icon-{n}.png")["source_url"] for n in ICONS}
+            icons = {n: upload_image(s, LP / "icons" / f"audit-icon2-{n}.png")["source_url"] for n in ICONS}
             new = transform(raw, media["checklist"]["source_url"], media["content"]["source_url"], icons)
             (log.dir / f"{page_id}-after.txt").write_text(new, encoding="utf-8")
             f = log.dir / "import.json"
