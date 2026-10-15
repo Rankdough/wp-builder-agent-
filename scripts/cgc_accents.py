@@ -16,12 +16,11 @@ from wpagent.layout.render import portability_json
 from wpagent.layout.restyle import visible_text
 from wpagent.runlog import RunLog
 
-# Task-board badge colours: Urgent red, High amber, on-time green, Medium blue, purple due dates.
-ACCENTS = {"red": "239,68,68", "amber": "245,158,11", "green": "34,197,94", "blue": "59,130,246",
-           "purple": "168,85,247"}
+# Task-board badge colours kept: Urgent red, on-time green, Medium blue.
+ACCENTS = {"red": "239,68,68", "green": "34,197,94", "blue": "59,130,246"}  # Roman: no yellow, no purple
 SECTIONS = [("Why Most Content Never Gets Cited", "red"), ("How We Write Content That Gets Cited", "blue"),
-            ("What Is Included in Our Content Service", "amber"), ("TrackBarn: 455", "green"),
-            ("Frequently Asked Questions", "purple")]
+            ("What Is Included in Our Content Service", "green"), ("TrackBarn: 455", "green"),
+            ("Frequently Asked Questions", "blue")]
 CSS = ("".join(f".rdm--{k}{{--acc:{v}}}" for k, v in ACCENTS.items()) +
        ".rdm .num{color:rgb(var(--acc,59,130,246));background:rgba(var(--acc,59,130,246),.12);"
        "border:1px solid rgba(var(--acc,59,130,246),.45);border-radius:6px;padding:5px 9px}"
@@ -30,7 +29,15 @@ CSS = ("".join(f".rdm--{k}{{--acc:{v}}}" for k, v in ACCENTS.items()) +
        ".rdm a.link{color:rgb(var(--acc,59,130,246))!important}"
        ".rdm .stat{color:rgb(var(--acc,255,255,255))}"
        ".rdm details[open]{border-color:rgb(var(--acc,59,130,246))}"
-       ".rdm summary:after{color:rgb(var(--acc,59,130,246))}")
+       ".rdm summary:after{color:rgb(var(--acc,59,130,246))}"
+       # Numbered circles (like the GSC page steps) before the Rule / Stage badges.
+       ".rdm .grid{counter-reset:rdc}.rdm .card{counter-increment:rdc}"
+       ".rdm .card .num{margin-top:7px}"
+       ".rdm .card:has(.num)::before{content:counter(rdc);float:left;width:38px;height:38px;margin:0 12px 10px 0;"
+       "border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;"
+       "color:rgb(var(--acc,59,130,246));background:rgba(var(--acc,59,130,246),.16);"
+       "border:1px solid rgba(var(--acc,59,130,246),.45)}"
+       ".rdm .card h3{clear:left}")
 MARK = "/* section accents */"
 FETCH = """async (id) => (await (await fetch(`/wp-json/wp/v2/pages/${id}?context=edit&_fields=status,content`,
     {headers: {'X-WP-Nonce': wpApiSettings.nonce}})).json())"""
