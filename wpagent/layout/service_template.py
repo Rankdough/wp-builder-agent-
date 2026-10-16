@@ -180,3 +180,60 @@ def outcomes(label, h2, groups, icons, cta):
     grid = (f'[et_pb_row column_structure="1_3,1_3,1_3" use_custom_gutter="on" gutter_width="3" {V} '
             f'custom_padding="20px||10px|||"]{cols}[/et_pb_row]')
     return section(label, text_row(f"<h2>{h2}</h2>") + grid + button_row(*cta))
+
+
+# --- Timeline section (Oct 2026). Every piece of copy is passed in by the page, so it fits that page's context. ---
+
+def eyebrow_heading(eyebrow, h2, lead_html):
+    """Small red uppercase line, a big centred heading and the intro."""
+    eb = (f'[et_pb_text {V} text_orientation="center" text_text_color="{RED}" text_font="|700||on|||||" '
+          f'text_font_size="12px" text_letter_spacing="0.22em" custom_margin="||10px||false|false"]<p>{eyebrow}</p>'
+          "[/et_pb_text]")
+    hd = (f'[et_pb_text {V} text_orientation="center" header_2_text_color="#ffffff" header_2_font_size="44px" '
+          f'header_2_line_height="1.15em" text_text_color="#b8bec6" text_font_size="17px" text_line_height="1.65em" '
+          f'max_width="760px" module_alignment="center"]<h2>{h2}</h2>{lead_html}[/et_pb_text]')
+    return f'[et_pb_row {V} custom_padding="0px||24px|||"][et_pb_column type="4_4" {V}]{eb}{hd}[/et_pb_column][/et_pb_row]'
+
+
+def timeline(phases, icons):
+    """phases: [(label, [(icon, title, body_html), (icon, title, body_html)])] x 3. A row of phase labels on a red line
+    with dots (rd-phase), then a row of cards, one per phase, each with two icon items split by a line."""
+    ends = ["rd-phase--first", "", "rd-phase--last"]
+    labels = "".join(f'[et_pb_column type="1_3" {V}][et_pb_text module_class="{("rd-phase " + ends[i]).strip()}" text_orientation="center" {V}]'
+                     f"<p>{lbl}</p>[/et_pb_text][/et_pb_column]" for i, (lbl, _) in enumerate(phases))
+    cards = ""
+    for _, items in phases:
+        mods = ""
+        for k, (ic, t, b) in enumerate(items):
+            extra = ('custom_padding="22px||0px|||" border_width_top="1px" border_color_top="#23272d"' if k
+                     else 'custom_padding="0px||22px|||"')
+            mods += blurb(icons[ic], t, b, place="left", title_size=18, extra=extra)
+        cards += f'[et_pb_column type="1_3" {V} {CARD}]{mods}[/et_pb_column]'
+    return (f'[et_pb_row column_structure="1_3,1_3,1_3" use_custom_gutter="on" gutter_width="2" {V} '
+            f'custom_padding="10px||14px|||"]{labels}[/et_pb_row]'
+            f'[et_pb_row column_structure="1_3,1_3,1_3" use_custom_gutter="on" gutter_width="2" make_equal="on" {V} '
+            f'custom_padding="0px||20px|||"]{cards}[/et_pb_row]')
+
+
+def cta_banner(icon, title, body, cta, icons):
+    """Wide card: icon, a bold line and a short sentence on the left, a red button on the right."""
+    left = blurb(icons[icon], title, f"<p>{body}</p>", place="left", title_size=26)
+    return (f'[et_pb_row column_structure="2_3,1_3" {V} background_color="#111316" '
+            f'custom_padding="26px|30px|26px|30px|false|false" border_radii="on|18px|18px|18px|18px" '
+            f'border_width_all="1px" border_color_all="#23272d" border_style_all="solid"]'
+            f'[et_pb_column type="2_3" {V}]{left}[/et_pb_column]'
+            f'[et_pb_column type="1_3" {V}]{button(cta[0], cta[1], align="right")}[/et_pb_column][/et_pb_row]')
+
+
+def pill_row(label, items):
+    """Centred label with lines either side, then centred pills with dots between them."""
+    return (f'[et_pb_row {V} custom_padding="34px||0px|||"][et_pb_column type="4_4" {V}]'
+            f'[et_pb_text module_class="rd-label-lines" {V} custom_margin="||16px||false|false"]<p>{label}</p>'
+            f'[/et_pb_text][et_pb_text module_class="rd-pills rd-pills--center" {V} text_text_color="#d4d8dd"]'
+            f'<ul>{"".join(f"<li>{x}</li>" for x in items)}</ul>[/et_pb_text][/et_pb_column][/et_pb_row]')
+
+
+def timeline_section(label, eyebrow, h2, lead_html, phases, icons, banner, pills=None):
+    """banner: (icon, title, body, (button text, url)). pills: (label, [items]) or None."""
+    rows = eyebrow_heading(eyebrow, h2, lead_html) + timeline(phases, icons) + cta_banner(*banner[:3], banner[3], icons)
+    return section(label, rows + (pill_row(*pills) if pills else ""))

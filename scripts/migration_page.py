@@ -33,7 +33,7 @@ SHOTS = {
     "monitor": (LP / "migration-gsc-example.png", "Example Search Console view of a migration: clicks and "
                 "impressions eight weeks before and after launch"),
 }
-ICONS = ["shield", "growth", "refresh", "globe", "layout", "unlink", "file", "share", "eyeoff", "copy", "bars", "search", "route",
+ICONS = ["checksq", "shield", "growth", "refresh", "globe", "layout", "unlink", "file", "share", "eyeoff", "copy", "bars", "search", "route",
          "window", "activity"]
 CHECKLIST = "https://www.rankdough.com/site-migration-services/site-migration-checklist/"
 MINH = ROOT / "runs" / "migration-minh.json"  # measured pill-card heights so text and graphic end level
@@ -83,16 +83,23 @@ def build(raw, img, icons, minh):
                          [(ic, t, f"<p>{b}</p>") for ic, (t, b) in
                           zip(("unlink", "file", "share", "eyeoff", "copy", "bars"), risks)],
                          icons, ("Get The Free Migration Checklist", CHECKLIST),
-                         pills=("Platforms we migrate", platforms), min_height=minh.get("Migration risks"))
+                         pills=("What we check", ["Redirects", "Content and metadata", "Internal links",
+                                                  "Crawler access", "Staging indexing", "Pre-launch benchmark"]),
+                         min_height=minh.get("Migration risks"))
 
     h2, lead = head(code["What is included"])
     stages = find(r'<span class="num">(.*?)</span><h3>(.*?)</h3><p>(.*?)</p>', code["What is included"], 6)
     dev_pills = ["Redirect map", "Checklists", "Staging tests", "Launch-day checks", "Post-launch monitoring"]
-    stage_sec = T.feature("What is included", img["monitor"], SHOTS["monitor"][1], False, h2, lead,
-                          [(ic, f"{n}: {t}", f"<p>{b}</p>") for ic, (n, t, b) in
-                           zip(("search", "route", "file", "share", "window", "activity"), stages)],
-                          icons, ("Talk to Us Before You Launch", "#contact"),
-                          pills=("What your developers get", dev_pills), min_height=minh.get("What is included"))
+    item = lambda ic, k: (ic, f"{stages[k][0]}: {stages[k][1]}", f"<p>{stages[k][2]}</p>")
+    stage_sec = T.timeline_section(
+        "What is included", "Six stages, one plan", h2, lead,
+        [("Plan", [item("search", 0), item("route", 1)]),
+         ("Build", [item("file", 2), item("share", 3)]),
+         ("Staging and launch", [item("window", 4), item("activity", 5)])],
+        icons, ("checksq", "Six stages. One controlled migration.",
+                "A clear plan, fewer surprises and a safer launch for the pages that earn.",
+                ("Talk to Us Before You Launch", "#contact")),
+        pills=("Platforms we migrate", platforms))
     st = {t: (ic, t, f"<p>{b}</p>") for ic, (_, t, b) in zip(("search", "route", "file", "share", "window", "activity"), stages)}
     names = [t for _, t, _ in stages]
     changes = T.outcomes("Migration outcomes", "What changes after your migration", [
