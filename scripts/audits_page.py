@@ -28,6 +28,9 @@ SHOTS = {
     "checklist": (LP / "seo-audit-checklist-example.png",
                   "Example technical SEO audit checklist: crawling, rendering, indexing, site architecture, "
                   "international SEO, backlinks and e-commerce, each with checks marked OK, to fix or to find out"),
+    "hero": (LP / "seo-audit-summary-t.png",
+             "Example SEO and content audit summary: checks, critical fixes, pages with a verdict and the first three "
+             "fixes ranked by priority"),
     "content": (LP / "content-audit-example.png",
                 "Example content audit: pages scored on Search Console data with keep, improve, merge or remove "
                 "verdicts"),
@@ -196,12 +199,28 @@ def who_row(raw, icons):
     return raw[:a] + row + raw[b:]
 
 
+def hero_card(raw, src):
+    """Header: the contact form (Code module) becomes the audit summary graphic. Only the first section is touched;
+    the form further down the page stays."""
+    first_end = raw.index("[/et_pb_section]") + len("[/et_pb_section]")
+    head = raw[:first_end]
+    img = (f'[et_pb_image src="{src}" alt="{SHOTS["hero"][1]}" title_text="{SHOTS["hero"][1]}" {V} '
+           f'custom_margin="-20px||||false|false"][/et_pb_image]')
+    new, n = re.subn(r'\[et_pb_code[^\]]*\]\s*\[form id="824"\]\s*\[/et_pb_code\]', lambda m: img, head, count=1)
+    if not n:
+        new, n = re.subn(r'\[et_pb_image src="[^"]*seo-audit-summary[^\]]*\]\[/et_pb_image\]', lambda m: img, head, count=1)
+    if not n:
+        raise SystemExit("Header form (or earlier summary graphic) not found in the first section")
+    return new + raw[first_end:]
+
+
 def sections(raw):
     starts = [m.start() for m in re.finditer(r"\[et_pb_section[\s\]]", raw)]
     return list(zip(starts, starts[1:] + [len(raw)]))
 
 
-def transform(raw, checklist_src, content_src, icons):
+def transform(raw, checklist_src, content_src, icons, hero_src):
+    raw = hero_card(raw, hero_src)
     raw = who_row(raw, icons)
     secs = sections(raw)
     first = [(a, b) for a, b in secs if any(n in raw[a:b] for n in OLD_IMGS)]
@@ -252,7 +271,7 @@ with sync_playwright() as pw:
         (log.backup / f"{page_id}-before.txt").write_text(raw, encoding="utf-8")
         if not live:
             fake = {n: f"{site.url}/wp-content/uploads/YYYY/MM/audit-icon2-{n}.png" for n in ICONS}
-            new = transform(raw, fake["growth"], fake["link"], fake)
+            new = transform(raw, fake["growth"], fake["link"], fake, fake["zap"])
             print(f"Dry run ({page['status']}): {len(raw)} -> {len(new)} chars. Nothing written.")
         else:
             media = {k: upload_image(s, p) for k, (p, _) in SHOTS.items()}
@@ -260,7 +279,8 @@ with sync_playwright() as pw:
                 s.allowed_writes = s.allowed_writes | {f"save-attachment@{m['id']}"}
                 set_alt_text(s, m["id"], SHOTS[k][1])
             icons = {n: upload_image(s, LP / "icons" / f"audit-icon2-{n}.png")["source_url"] for n in ICONS}
-            new = transform(raw, media["checklist"]["source_url"], media["content"]["source_url"], icons)
+            new = transform(raw, media["checklist"]["source_url"], media["content"]["source_url"], icons,
+                            media["hero"]["source_url"])
             (log.dir / f"{page_id}-after.txt").write_text(new, encoding="utf-8")
             f = log.dir / "import.json"
             f.write_text(portability_json(new, page_id, global_colors(site.name)), encoding="utf-8")

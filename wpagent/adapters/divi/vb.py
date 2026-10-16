@@ -2,6 +2,7 @@
 Selectors confirmed on Divi 4.27.4 (live site, Oct 2026)."""
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from ...browser.session import Session
@@ -97,3 +98,26 @@ class VisualBuilder:
         self.ui_click(btn.first, "Save Draft")
         s.page.wait_for_timeout(6_000)
         s.log.event("saved_draft", page_id=self.page_id)
+
+
+SAVE_LIBRARY_BTN = "button:has(.et-fb-icon--save)"
+LIBRARY_ACTION = "et_fb_save_layout"  # the one write Save to Library makes (Divi 4.27.4)
+
+
+def save_to_library(vb: VisualBuilder, name: str) -> None:
+    """Page settings bar > Save to Library: type the layout name, click Save To Library. Needs LIBRARY_ACTION allowed.
+    Saves the whole page as one library layout (not each section/row/module separately)."""
+    s = vb.s
+    vb.ui_click(s.page.locator(SAVE_LIBRARY_BTN).first, "Save to Library")
+    modal = s.page.locator(".et-fb-tooltip-modal, .et-fb-modal").filter(has=s.page.locator("a.et-fb-save-library-button")).first
+    modal.wait_for(timeout=15_000)
+    modal.locator("input.et-fb-settings-option-input").first.fill(name)
+    with s.page.expect_response(lambda r: "admin-ajax.php" in r.url and r.request.method == "POST"
+                                and LIBRARY_ACTION in (r.request.post_data or ""), timeout=60_000) as resp:
+        vb.ui_click(modal.locator("a.et-fb-save-library-button").first, "Save To Library")
+    body = resp.value.text()
+    m = re.search(r'"post_id":(\d+)', body)  # Divi replies with the new library layout's id
+    ok = resp.value.ok and bool(m)
+    s.log.event("saved_to_library", name=name, ok=ok, status=resp.value.status, layout_id=m and int(m.group(1)))
+    if not ok:
+        raise RuntimeError(f"Save to Library failed: HTTP {resp.value.status} {resp.value.text()[:200]}")
