@@ -271,3 +271,43 @@ def numbered_items(eyebrow, h2, lead_html, cta, items, icons, footer_label=None,
                        f'[et_pb_column type="4_4" {V}][et_pb_text {V} text_orientation="right" text_text_color="#d4d8dd" '
                        f'text_font_size="13px"]{line}[/et_pb_text][/et_pb_column][/et_pb_row]', pad=20)
     return out
+
+
+def check_panel(rows, label="Illustrative check"):
+    """rows: [(left, middle, badge_text, 'ok'|'warn')]. Small example panel inside an accordion item (rd-check)."""
+    tr = "".join(f"<tr><td>{a}</td><td>&rarr;</td><td>{b}</td><td><b class=\"{k}\">{t}</b></td></tr>" for a, b, t, k in rows)
+    return f'<div class="rd-check"><p>{label}</p><table>{tr}</table></div>'
+
+
+def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=None, footer_items=None):
+    """Left: eyebrow with a red rule, heading, intro, button, then an optional small list (e.g. platforms).
+    Right: numbered accordion (Toggle modules, rd-acc), first item open. items: [(title, body_html)]."""
+    foot = ""
+    if footer_label:
+        foot = (f'[et_pb_text {V} text_text_color="#d4d8dd" text_font_size="16px" text_line_height="1.8em" '
+                f'custom_margin="36px||||false|false" custom_padding="26px||||false|false" border_width_top="1px" '
+                f'border_color_top="#23272d"]<p><span style="color: #64748b; font-size: 11px; letter-spacing: 0.2em;">'
+                f'{footer_label.upper()}</span><br />{" &middot; ".join(footer_items)}</p>[/et_pb_text]')
+    left = (f'[et_pb_column type="2_5" {V}]'
+            f'[et_pb_text module_class="rd-eyebrow" {V} text_text_color="{RED}" text_font="|700||on|||||" '
+            f'text_font_size="12px" text_letter_spacing="0.22em" custom_margin="||16px||false|false"]<p>{eyebrow}</p>'
+            f'[/et_pb_text][et_pb_text {V} header_2_text_color="#ffffff" header_2_font_size="46px" '
+            f'header_2_line_height="1.1em" text_text_color="#b8bec6" text_font_size="19px" text_line_height="1.6em" '
+            f'custom_margin="||28px||false|false"]<h2>{h2}</h2>{lead_html}[/et_pb_text]'
+            f"{button(cta[0], cta[1], align='left')}{foot}[/et_pb_column]")
+    toggles = ""
+    for i, (t, body) in enumerate(items):
+        cls = "rd-acc rd-acc--first" if i == 0 else "rd-acc"
+        top = f'border_width_top="1px" border_color_top="{RED}" ' if i == 0 else ""
+        toggles += (f'[et_pb_toggle title="{attr(t)}"{" open=\"on\"" if i == 0 else ""} module_class="{cls}" {V} '
+                    f'open_toggle_background_color="rgba(0,0,0,0)" closed_toggle_background_color="rgba(0,0,0,0)" '
+                    f'title_text_color="#ffffff" closed_title_text_color="#ffffff" title_font_size="20px" '
+                    f'title_level="h3" body_text_color="#b8bec6" body_font_size="16px" icon_color="#94a3b8" '
+                    f'open_icon_color="{RED}" border_radii="on|0px|0px|0px|0px" border_width_all="0px" '
+                    f'border_width_bottom="1px" border_color_bottom="#23272d" {top}'
+                    f'custom_padding="22px|0px|22px|0px|false|false" custom_margin="||0px||false|false"]'
+                    f"{body}[/et_pb_toggle]")
+    right = f'[et_pb_column type="3_5" {V}]{toggles}[/et_pb_column]'
+    row = (f'[et_pb_row column_structure="2_5,3_5" use_custom_gutter="on" gutter_width="4" {V}]'
+           f"{left}{right}[/et_pb_row]")
+    return section(label, row)

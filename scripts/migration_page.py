@@ -79,13 +79,18 @@ def build(raw, img, icons, minh):
     h2, lead = head(code["Migration risks"])
     risks = find(r"<h3>(.*?)</h3><p>(.*?)</p>", code["Migration risks"], 6)
     platforms = ["Shopify", "WordPress", "WooCommerce", "Magento", "BigCommerce", "Custom builds"]
-    risk_sec = T.feature("Migration risks", img["redirects"], SHOTS["redirects"][1], True, h2, lead,
-                         [(ic, t, f"<p>{b}</p>") for ic, (t, b) in
-                          zip(("unlink", "file", "share", "eyeoff", "copy", "bars"), risks)],
-                         icons, ("Get The Free Migration Checklist", CHECKLIST),
-                         pills=("What we check", ["Redirects", "Content and metadata", "Internal links",
-                                                  "Crawler access", "Staging indexing", "Pre-launch benchmark"]),
-                         min_height=minh.get("Migration risks"))
+    checks = [  # illustrative example rows, one small panel per risk
+        [("/old-page", "/new-page", "301", "ok"), ("/removed-page", "404", "Review", "warn")],
+        [("Title tag", "carried over", "Kept", "ok"), ("Meta description", "missing", "Review", "warn")],
+        [("/category/boots", "14 internal links", "OK", "ok"), ("/guides/size-chart", "no links in", "Orphan", "warn")],
+        [("robots.txt", "Disallow: /", "Review", "warn"), ("GPTBot", "allowed", "OK", "ok")],
+        [("staging.yoursite.com", "noindex + password", "OK", "ok"), ("dev.yoursite.com", "212 pages indexed", "Review", "warn")],
+        [("Rankings", "top 500 saved", "Saved", "ok"), ("Clicks by page", "28 days saved", "Saved", "ok")],
+    ]
+    risk_sec = T.accordion_section(
+        "Migration risks", "Before you migrate", h2, lead, ("Get The Free Migration Checklist", CHECKLIST),
+        [(t, f"<p>{b}</p>" + T.check_panel(rows)) for (t, b), rows in zip(risks, checks)],
+        footer_label="Platforms we migrate", footer_items=platforms)
 
     h2, lead = head(code["What is included"])
     stages = find(r'<span class="num">(.*?)</span><h3>(.*?)</h3><p>(.*?)</p>', code["What is included"], 6)
@@ -99,7 +104,7 @@ def build(raw, img, icons, minh):
         icons, ("checksq", "Six stages. One controlled migration.",
                 "A clear plan, fewer surprises and a safer launch for the pages that earn.",
                 ("Talk to Us Before You Launch", "#contact")),
-        pills=("Platforms we migrate", platforms))
+        pills=None)  # platforms now sit in the risks section
     st = {t: (ic, t, f"<p>{b}</p>") for ic, (_, t, b) in zip(("search", "route", "file", "share", "window", "activity"), stages)}
     names = [t for _, t, _ in stages]
     changes = T.outcomes("Migration outcomes", "What changes after your migration", [
