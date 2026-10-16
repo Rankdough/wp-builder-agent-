@@ -22,7 +22,14 @@ from wpagent.runlog import RunLog
 
 CONTACT = "https://www.rankdough.com/contact/"
 ICONS = ["search", "window", "bars", "file", "activity", "checksq"]
-DROPPED = {"A healthier site. More room to grow.", "Everything your developers need to start fixing straight away."}
+DROPPED = {"A healthier site. More room to grow.", "Everything your developers need to start fixing straight away.",
+           # content audit top part removed on request (16 Oct): pill card and grid heading
+           "What you get", "A clear verdict and next step for every page on your site.", "Verdict for every page",
+           "Search Console data per page", "Pages close to page one", "Merge plan for competing pages",
+           "Content gaps vs competitors", "Internal linking plan", "Topics to write next",
+           "Recorded video walkthrough", "Stronger pages. More of them earning."}
+HERO_IMG = ROOT / "runs" / "lp" / "seo-audit-summary-hero.png"
+SOURCE = ROOT / "runs" / "audits-3948-current.txt"  # the page as it was before the template rebuild
 CHECKS = [  # illustrative example rows, one per technical benefit, in the page's order
     [("/category/boots", "indexed", "OK", "ok"), ("/?sort=price", "crawled, not indexed", "Review", "warn")],
     [("/category/boots", "2 clicks from home", "OK", "ok"), ("/guides/size-chart", "no links in", "Orphan", "warn")],
@@ -76,7 +83,7 @@ def pill_card(sec):
     return html.unescape(m.group(1)), m.group(2), re.findall(r"<li>(.*?)</li>", m.group(3))
 
 
-def build(raw, icons):
+def build(raw, icons, hero_src):
     S = secs(raw)
     label = lambda s: (re.search(r'admin_label="([^"]*)"', s[:500]) or [None, ""])[1]
     hero_s, who_s = S[0], S[1]
@@ -89,7 +96,7 @@ def build(raw, icons):
     hero_img = one(r'\[et_pb_image src="([^"]*seo-audit-summary[^"]*)"', hero_s)
     hero_alt = html.unescape(one(r'seo-audit-summary[^"]*" alt="([^"]*)"', hero_s))
     hero = T.hero(["250+ checks", "Technical and content", "Video walkthrough"], h1, intro,
-                  ("Get in Touch", CONTACT), ("See What Is Included", "#technical"), hero_img, hero_alt)
+                  ("Get in Touch", CONTACT), ("See What Is Included", "#technical"), hero_src or hero_img, hero_alt)
 
     who_h2 = html.unescape(one(r'\[et_pb_heading title="([^"]*)"', who_s)) if "et_pb_heading" in who_s else \
         re.sub(r"<[^>]+>", "", one(r"<h2>(.*?)</h2>", who_s))
@@ -107,14 +114,8 @@ def build(raw, icons):
 
     c_h2 = one(r"<h2>(.*?)</h2>", cont.split("[et_pb_blurb", 1)[0])
     c_intro = one(r"</h2><p>(.*?)</p>", cont)
-    c_card = pill_card(cont)
-    c_img = one(r'\[et_pb_image src="([^"]*)"', cont)
-    c_alt = html.unescape(one(r'\[et_pb_image src="[^"]*" alt="([^"]*)"', cont))
-    c_grid = re.findall(r"<h2>(.*?)</h2>", cont)[-1]
     c_cards = [(img, t, b) for t, b, img in blurbs(cont)]
-    content = T.feature("Audit: content", c_img, c_alt, False, c_h2, f"<p>{c_intro}</p>", c_cards,
-                        {c[0]: c[0] for c in c_cards}, ("Get Your Audit", CONTACT),
-                        pills=(c_card[0], c_card[2], c_card[1]), grid_h2=c_grid)
+    content = T.cards_section("Audit: content", c_h2, f"<p>{c_intro}</p>", c_cards, {c[0]: c[0] for c in c_cards})
 
     process = T.timeline_section(
         "Audit: process", "How the audit works", "From Your Data to a Ranked Fix List",
@@ -146,13 +147,15 @@ with sync_playwright() as pw:
         s.login()
         s.goto("/wp-admin/")
         page = s.page.evaluate(FETCH, page_id)
-        raw = page["content"]["raw"]
-        (log.backup / f"{page_id}-before.txt").write_text(raw, encoding="utf-8")
+        (log.backup / f"{page_id}-before.txt").write_text(page["content"]["raw"], encoding="utf-8")
+        raw = SOURCE.read_text(encoding="utf-8")
         if live:
             icons = {n: upload_image(s, ROOT / "runs" / "lp" / "icons" / f"audit-icon2-{n}.png")["source_url"] for n in ICONS}
+            hero_src = upload_image(s, HERO_IMG)["source_url"]
         else:
+            hero_src = None
             icons = {n: f"{site.url}/wp-content/uploads/YYYY/MM/audit-icon2-{n}.png" for n in ICONS}
-        new = build(raw, icons)
+        new = build(raw, icons, hero_src)
         words = T.visible_words(new).lower()
         lost = [g for g in T.text_segments(raw) if g.lower() not in words and g not in DROPPED]
         if lost:

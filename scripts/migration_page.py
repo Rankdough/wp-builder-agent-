@@ -22,7 +22,7 @@ from wpagent.runlog import RunLog
 
 LP = ROOT / "runs" / "lp"
 SHOTS = {
-    "plan": (LP / "migration-plan-example.png", "Example SEO migration plan: URLs crawled, redirects mapped, "
+    "plan": (LP / "migration-plan-hero.png", "Example SEO migration plan: URLs crawled, redirects mapped, "
              "checks before launch, and the plan from benchmark to launch-day checks"),
     "redirects": (LP / "migration-chat-example.png", "Example: Claude reading Search Console data to find old URLs "
                   "that lost clicks after a migration, with 404s and redirect chains flagged"),

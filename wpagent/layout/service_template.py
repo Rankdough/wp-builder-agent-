@@ -83,7 +83,7 @@ def feature(label, img, img_alt, image_left, h2, lead_html, cards, icons, cta, p
                 f"<h2>{h2}</h2>{lead_html}[/et_pb_text]{pill_card(*pills, min_height=min_height) if pills else ''}[/et_pb_column]")
     img_col = (f'[et_pb_column type="2_5" {V}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
                f'title_text="{attr(img_alt)}" {V}][/et_pb_image][/et_pb_column]')
-    top = (f'[et_pb_row column_structure="{"2_5,3_5" if image_left else "3_5,2_5"}" {V} custom_padding="0px||30px|||"]'
+    top = (f'[et_pb_row column_structure="{"2_5,3_5" if image_left else "3_5,2_5"}" module_class="rd-level" make_equal="on" {V} custom_padding="0px||30px|||"]'
            f"{img_col + text_col if image_left else text_col + img_col}[/et_pb_row]")
     grid_head = text_row(f"<h2>{grid_h2}</h2>") if grid_h2 else ""
     return section(label, top + grid_head + card_rows(cards, icons) + button_row(*cta))
@@ -292,7 +292,7 @@ def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=No
     left = (f'[et_pb_column type="2_5" {V}]'
             f'[et_pb_text module_class="rd-eyebrow" {V} text_text_color="{RED}" text_font="|700||on|||||" '
             f'text_font_size="12px" text_letter_spacing="0.22em" custom_margin="||16px||false|false"]<p>{eyebrow}</p>'
-            f'[/et_pb_text][et_pb_text {V} header_2_text_color="#ffffff" header_2_font_size="46px" '
+            f'[/et_pb_text][et_pb_text {V} header_2_text_color="#ffffff" header_2_font_size="40px" '
             f'header_2_line_height="1.1em" text_text_color="#b8bec6" text_font_size="19px" text_line_height="1.6em" '
             f'custom_margin="||28px||false|false"]<h2>{h2}</h2>{lead_html}[/et_pb_text]'
             f"{button(cta[0], cta[1], align='left')}{foot}[/et_pb_column]")
@@ -309,7 +309,7 @@ def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=No
                     f'custom_padding="22px|0px|22px|0px|false|false" custom_margin="||0px||false|false"]'
                     f"{body}[/et_pb_toggle]")
     right = f'[et_pb_column type="3_5" {V}]{toggles}[/et_pb_column]'
-    row = (f'[et_pb_row column_structure="2_5,3_5" use_custom_gutter="on" gutter_width="4" {V}]'
+    row = (f'[et_pb_row column_structure="2_5,3_5" use_custom_gutter="on" gutter_width="4" module_class="rd-level rd-level--spread" make_equal="on" {V}]'
            f"{left}{right}[/et_pb_row]")
     return section(label, row, css_id=css_id)
 
