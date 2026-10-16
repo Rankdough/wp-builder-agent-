@@ -35,7 +35,10 @@ SHOTS = {
 }
 ICONS = ["checksq", "shield", "growth", "refresh", "globe", "layout", "unlink", "file", "share", "eyeoff", "copy", "bars", "search", "route",
          "window", "activity"]
-CHECKLIST = "https://www.rankdough.com/site-migration-services/site-migration-checklist/"
+# The free checklist page was retired (404, 16 Oct 2026): no links to it. Its CTAs point at the contact form.
+RETIRED = "site-migration-checklist"
+CTA = ("Talk to Us Before You Launch", "#contact")
+DROPPED = {"Get The Free Migration Checklist", "free SEO site migration checklist", "Start with our", ", or ask for a"}
 MINH = ROOT / "runs" / "migration-minh.json"  # measured pill-card heights so text and graphic end level
 
 
@@ -72,7 +75,7 @@ def build(raw, img, icons, minh):
     h1 = find(r"<h1>(.*?)</h1>", h0, 1)[0]
     paras = "".join(f"<p>{x}</p>" for x in find(r"<p>(.*?)</p>", h0, 2))
     btn = re.search(r'button_url="([^"]*)" button_text="([^"]*)"', h0)
-    hero = T.hero(["Platform moves", "Domain changes", "Redesigns"], h1, paras, (btn.group(2), btn.group(1)),
+    hero = T.hero(["Platform moves", "Domain changes", "Redesigns"], h1, paras, CTA,
                   ("See What Is Included", "#included"), img["plan"], SHOTS["plan"][1])
 
     h2, lead = head(code["Migration types"])
@@ -93,7 +96,7 @@ def build(raw, img, icons, minh):
         [("Rankings", "top 500 saved", "Saved", "ok"), ("Clicks by page", "28 days saved", "Saved", "ok")],
     ]
     risk_sec = T.accordion_section(
-        "Migration risks", "Before you migrate", h2, lead, ("Get The Free Migration Checklist", CHECKLIST),
+        "Migration risks", "Before you migrate", h2, lead, CTA,
         [(t, f"<p>{b}</p>" + T.check_panel(rows)) for (t, b), rows in zip(risks, checks)],
         footer_label="Platforms we migrate", footer_items=platforms)
 
@@ -145,7 +148,11 @@ def build(raw, img, icons, minh):
     footer = by["Footer"]
     if 'module_id="contact"' not in footer[:600]:
         footer = footer.replace('admin_label="Footer"', 'admin_label="Footer" module_id="contact"', 1)
-    return hero + who + risk_sec + stage_sec + proof + changes + faq + footer
+    out = hero + who + risk_sec + stage_sec + proof + changes + faq + footer
+    out = re.sub(r"Start with our <a\s[^>]*" + RETIRED + r"[^>]*>.*?</a>, or ask for a ", "Ask for a ", out, flags=re.S)
+    if RETIRED in out:
+        raise SystemExit("A link to the retired checklist page is still in the layout")
+    return out
 
 
 FETCH = """async (id) => (await (await fetch(`/wp-json/wp/v2/pages/${id}?context=edit&_fields=status,content`,
@@ -184,7 +191,7 @@ with sync_playwright() as pw:
         minh = json.loads(MINH.read_text()) if MINH.exists() else {}
         new = build(original, img, icons, minh)
         words = T.visible_words(new)
-        lost = [seg for seg in T.text_segments(original) if seg not in words]
+        lost = [seg for seg in T.text_segments(original) if seg not in words and seg not in DROPPED]
         if lost:
             raise SystemExit("Text would be lost: " + " | ".join(lost[:10]))
         if "<style" in new or new.count("[et_pb_code") != 2:
