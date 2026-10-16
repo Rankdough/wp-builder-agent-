@@ -73,7 +73,7 @@ def test_write_mode_allows_only_planned_actions():
     ]:
         route = FakeRoute()
         s._guard(route, req("POST", "/wp-admin/admin-ajax.php", body))
-        assert route.result == expected, body
+        assert route.result == expected
 
 
 def test_write_mode_still_blocks_write_endpoints():
@@ -160,7 +160,7 @@ def test_save_attachment_scoped_to_one_id():
                            ("action=save-attachment&id=12&changes[alt]=x", "aborted")):
         route = FakeRoute()
         s._guard(route, req("POST", "/wp-admin/admin-ajax.php", body))
-        assert route.result == expected, body
+        assert route.result == expected
 
 
 def test_quick_edit_scoped_to_one_page():
@@ -169,7 +169,7 @@ def test_quick_edit_scoped_to_one_page():
                            ("action=inline-save&post_ID=3692&post_title=x", "aborted")):
         route = FakeRoute()
         s._guard(route, req("POST", "/wp-admin/admin-ajax.php", body))
-        assert route.result == expected, body
+        assert route.result == expected
 
 
 def test_post_edit_scoped_to_one_post():
@@ -178,7 +178,16 @@ def test_post_edit_scoped_to_one_post():
                            ("post_ID=3692&action=editpost", "aborted"), ("action=editpost", "aborted")):
         route = FakeRoute()
         s._guard(route, req("POST", "/wp-admin/post.php", body))
-        assert route.result == expected, body
+        assert route.result == expected
     s, route = make_session(), FakeRoute()
     s._guard(route, req("POST", "/wp-admin/post.php", "post_ID=3907"))
     assert route.result == "aborted"
+
+
+def test_menu_save_scoped_to_one_menu():
+    s = write_session({"nav_menu_save@12"})
+    for menu, expected in (("12", "continued"), ("26", "aborted")):
+        route = FakeRoute()
+        body = '[{"name":"action","value":"update"},{"name":"menu","value":"%s"}]' % menu
+        s._guard(route, req("POST", f"/wp-admin/nav-menus.php?action=edit&menu={menu}", body))
+        assert route.result == expected

@@ -88,6 +88,10 @@ class Session:
             # Classic edit screen (Update/Publish, Yoast box): allowed only for the one post in the plan.
             self.log.event("write_allowed", action="post_edit", post_id=self._post_id(body))
             return route.continue_()
+        elif url.path.endswith("/wp-admin/nav-menus.php") and f"nav_menu_save@{self._menu_id(url.query, body)}" in self.allowed_writes:
+            # Appearance > Menus > Save Menu: allowed only for the one menu in the plan.
+            self.log.event("write_allowed", action="nav_menu_save", menu=self._menu_id(url.query, body))
+            return route.continue_()
         elif url.path.startswith(BLOCKED_POST_PATHS):
             reason = "write endpoint"
         elif "/wp-json/" in url.path or "rest_route" in url.query:
@@ -130,6 +134,18 @@ class Session:
                 return form[key][0]
         m = re.search(r'name="post_id"\r?\n\r?\n(\d+)', body)
         return m.group(1) if m else None
+
+    @staticmethod
+    def _menu_id(query: str, body: str) -> str:
+        """The menu a Save Menu request writes: 'menu' in the form or the URL (urlencoded or multipart)."""
+        v = parse_qs(query).get("menu")
+        if v:
+            return v[0]
+        m = re.search(r'"name":"menu","value":"(\d+)"', body)  # WordPress posts the menu form as JSON in multipart
+        if m:
+            return m.group(1)
+        m = re.search(r'name="menu"\r?\n\r?\n(\d+)', body)
+        return m.group(1) if m else ""
 
     @staticmethod
     def _ajax_action(request: Request) -> str:
