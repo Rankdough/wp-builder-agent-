@@ -62,20 +62,24 @@ def section(label, rows, bg="#000000", pad=70, css_id=None):
             f'custom_padding="{pad}px||{pad}px|||"]{rows}[/et_pb_section]')
 
 
-def pill_card(title, pills, intro=None):
+def pill_card(title, pills, intro=None, min_height=None):
+    """min_height (px, desktop only) stretches the card so the text column ends level with the graphic beside it."""
     p = f"<p>{intro}</p>" if intro else ""
-    return (f'[et_pb_blurb title="{attr(title)}" module_class="rd-pills rd-pills--lg" {V} header_level="h3" '
+    mh = (f'min_height="{min_height}px" min_height_tablet="0px" min_height_phone="0px" '
+          f'min_height_last_edited="on|phone" ' if min_height else "")
+    return (f'[et_pb_blurb title="{attr(title)}" module_class="rd-pills rd-pills--lg" {V} {mh}header_level="h3" '
             f'header_text_color="#ffffff" header_font_size="20px" body_text_color="#d4d8dd" body_font_size="17px" '
             f'background_color="#14171b" custom_padding="28px|28px|28px|28px|false|false" '
             f'border_radii="on|16px|16px|16px|16px" border_width_all="1px" border_color_all="#23272d" '
             f'border_style_all="solid"]{p}<ul>{"".join(f"<li>{x}</li>" for x in pills)}</ul>[/et_pb_blurb]')
 
 
-def feature(label, img, img_alt, image_left, h2, lead_html, cards, icons, cta, pills=None, grid_h2=None):
+def feature(label, img, img_alt, image_left, h2, lead_html, cards, icons, cta, pills=None, grid_h2=None,
+            min_height=None):
     """Graphic + heading/intro/pill card, then optional centred heading, icon card grid and button."""
     text_col = (f'[et_pb_column type="3_5" {V}][et_pb_text {V} text_text_color="#b8bec6" text_font_size="18px" '
                 f'text_line_height="1.65em" header_2_text_color="#ffffff" custom_margin="||24px||false|false"]'
-                f"<h2>{h2}</h2>{lead_html}[/et_pb_text]{pill_card(*pills) if pills else ''}[/et_pb_column]")
+                f"<h2>{h2}</h2>{lead_html}[/et_pb_text]{pill_card(*pills, min_height=min_height) if pills else ''}[/et_pb_column]")
     img_col = (f'[et_pb_column type="2_5" {V}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
                f'title_text="{attr(img_alt)}" {V}][/et_pb_image][/et_pb_column]')
     top = (f'[et_pb_row column_structure="{"2_5,3_5" if image_left else "3_5,2_5"}" {V} custom_padding="0px||30px|||"]'
@@ -96,12 +100,13 @@ def proof(label, kicker, stat, h2, lead_html, bg="#0b0d10", img=None, img_alt=""
             f'[et_pb_text {V} text_text_color="{RED}" text_font_size="88px" text_line_height="1em" '
             f'text_font="|800|||||||"]<p>{stat}</p>[/et_pb_text]')
     right = (f'[et_pb_text {V} text_text_color="#b8bec6" text_font_size="17px" text_line_height="1.65em" '
-             f'header_2_text_color="#ffffff" header_2_font_size="28px"]<h2>{h2}</h2>{lead_html}[/et_pb_text]')
+             f'header_2_text_color="#ffffff"]<h2>{h2}</h2>{lead_html}[/et_pb_text]')
     if img:  # result text in one column, the chart in the other
-        txt = f'[et_pb_column type="1_2" {V}]{left}{right}[/et_pb_column]'
-        pic = (f'[et_pb_column type="1_2" {V}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
+        # same column split as the feature sections, so every graphic on the page is the same size
+        txt = f'[et_pb_column type="3_5" {V}]{left}{right}[/et_pb_column]'
+        pic = (f'[et_pb_column type="2_5" {V}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
                f'title_text="{attr(img_alt)}" align="center" {V}][/et_pb_image][/et_pb_column]')
-        row = (f'[et_pb_row column_structure="1_2,1_2" {V} custom_padding="0px||0px|||"]'
+        row = (f'[et_pb_row column_structure="{"2_5,3_5" if image_left else "3_5,2_5"}" {V} custom_padding="0px||0px|||"]'
                f'{pic + txt if image_left else txt + pic}[/et_pb_row]')
         return section(label, row, bg=bg)
     row = (f'[et_pb_row column_structure="1_3,2_3" {V}][et_pb_column type="1_3" {V}]{left}[/et_pb_column]'
@@ -159,3 +164,19 @@ def visible_words(raw):
     t = re.sub(r"\[/?et_pb_[^\]]*\]|\[form[^\]]*\]", " ", t)
     t = re.sub(r"</?span[^>]*>", "", t)
     return " ".join(html.unescape(re.sub(r"<[^>]+>", " ", t) + " " + titles).split())
+
+
+def outcomes(label, h2, groups, icons, cta):
+    """'What changes after…' section: three columns with dividing lines. Each group: (icon, title, intro_html,
+    [(icon, title, body_html), (icon, title, body_html)]). Always included on service pages."""
+    cols = ""
+    for n, (ic, title, intro, items) in enumerate(groups):
+        line = 'border_width_right="1px" border_color_right="#23272d" ' if n < len(groups) - 1 else ""
+        mods = blurb(icons[ic], title, intro, place="left", title_size=24, extra='custom_margin="||10px||false|false"')
+        for jc, t, b in items:
+            mods += blurb(icons[jc], t, b, place="left", title_size=18,
+                          extra='custom_padding="22px||10px|||" border_width_top="1px" border_color_top="#23272d"')
+        cols += f'[et_pb_column type="1_3" {V} {line}custom_padding="0px|24px|0px|0px|false|false"]{mods}[/et_pb_column]'
+    grid = (f'[et_pb_row column_structure="1_3,1_3,1_3" use_custom_gutter="on" gutter_width="3" {V} '
+            f'custom_padding="20px||10px|||"]{cols}[/et_pb_row]')
+    return section(label, text_row(f"<h2>{h2}</h2>") + grid + button_row(*cta))

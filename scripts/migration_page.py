@@ -24,18 +24,19 @@ LP = ROOT / "runs" / "lp"
 SHOTS = {
     "plan": (LP / "migration-plan-example.png", "Example SEO migration plan: URLs crawled, redirects mapped, "
              "checks before launch, and the plan from benchmark to launch-day checks"),
-    "redirects": (LP / "migration-redirects-example.png", "Example redirect check: old URLs mapped to new ones, "
-                  "with correct 301s, missing redirects and redirect chains"),
-    "hw_chart": (LP / "hostelworld-migration-chart.png", "Hostelworld organic traffic before and after moving its "
+    "redirects": (LP / "migration-chat-example.png", "Example: Claude reading Search Console data to find old URLs "
+                  "that lost clicks after a migration, with 404s and redirect chains flagged"),
+    "hw_chart": (LP / "hostelworld-migration-chart2.png", "Hostelworld organic traffic before and after moving its "
                  "German, French, Spanish and Italian sites from subdomains to subfolders (Ahrefs estimates)"),
-    "ppt_chart": (LP / "proplayerteam-migration-chart.png", "ProPlayerTeam organic clicks before and after its move "
+    "ppt_chart": (LP / "proplayerteam-migration-chart2.png", "ProPlayerTeam organic clicks before and after its move "
                   "to Shopify (Search Console)"),
-    "monitor": (LP / "migration-monitor-example.png", "Example launch monitor: organic clicks against the "
-                "pre-launch benchmark, indexing, crawl errors and rankings after launch"),
+    "monitor": (LP / "migration-gsc-example.png", "Example Search Console view of a migration: clicks and "
+                "impressions eight weeks before and after launch"),
 }
-ICONS = ["refresh", "globe", "layout", "unlink", "file", "share", "eyeoff", "copy", "bars", "search", "route",
+ICONS = ["shield", "growth", "refresh", "globe", "layout", "unlink", "file", "share", "eyeoff", "copy", "bars", "search", "route",
          "window", "activity"]
 CHECKLIST = "https://www.rankdough.com/site-migration-services/site-migration-checklist/"
+MINH = ROOT / "runs" / "migration-minh.json"  # measured pill-card heights so text and graphic end level
 
 
 def code_bodies(raw):
@@ -56,7 +57,7 @@ def head(body):
     return h2, f"<p>{lead}</p>"
 
 
-def build(raw, img, icons):
+def build(raw, img, icons, minh):
     secs = T.sections(raw)
     labels = [re.search(r'admin_label="([^"]*)"', s[:400]) for s in secs]
     labels = [m.group(1) if m else "" for m in labels]
@@ -82,7 +83,7 @@ def build(raw, img, icons):
                          [(ic, t, f"<p>{b}</p>") for ic, (t, b) in
                           zip(("unlink", "file", "share", "eyeoff", "copy", "bars"), risks)],
                          icons, ("Get The Free Migration Checklist", CHECKLIST),
-                         pills=("Platforms we migrate", platforms))
+                         pills=("Platforms we migrate", platforms), min_height=minh.get("Migration risks"))
 
     h2, lead = head(code["What is included"])
     stages = find(r'<span class="num">(.*?)</span><h3>(.*?)</h3><p>(.*?)</p>', code["What is included"], 6)
@@ -91,7 +92,17 @@ def build(raw, img, icons):
                           [(ic, f"{n}: {t}", f"<p>{b}</p>") for ic, (n, t, b) in
                            zip(("search", "route", "file", "share", "window", "activity"), stages)],
                           icons, ("Talk to Us Before You Launch", "#contact"),
-                          pills=("What your developers get", dev_pills))
+                          pills=("What your developers get", dev_pills), min_height=minh.get("What is included"))
+    st = {t: (ic, t, f"<p>{b}</p>") for ic, (_, t, b) in zip(("search", "route", "file", "share", "window", "activity"), stages)}
+    names = [t for _, t, _ in stages]
+    changes = T.outcomes("Migration outcomes", "What changes after your migration", [
+        ("shield", "Keep your rankings", "<p>Every page that earns traffic keeps a home, so the rankings and links "
+         "you built carry over.</p>", [st[names[1]], st[names[2]]]),
+        ("window", "Launch without surprises", "<p>Problems get caught on staging and against the benchmark, not "
+         "after Google finds them.</p>", [st[names[0]], st[names[4]]]),
+        ("growth", "Grow after the move", "<p>The new site starts from a clean base and keeps climbing once it "
+         "settles.</p>", [st[names[3]], st[names[5]]]),
+    ], icons, ("Talk to Us Before You Launch", "#contact"))
 
     p = code["Migration proof"]
     kicker = find(r'<span class="num">(.*?)</span>', p, 1)[0]
@@ -117,7 +128,7 @@ def build(raw, img, icons):
     footer = by["Footer"]
     if 'module_id="contact"' not in footer[:600]:
         footer = footer.replace('admin_label="Footer"', 'admin_label="Footer" module_id="contact"', 1)
-    return hero + who + risk_sec + stage_sec + proof + faq + footer
+    return hero + who + risk_sec + stage_sec + proof + changes + faq + footer
 
 
 FETCH = """async (id) => (await (await fetch(`/wp-json/wp/v2/pages/${id}?context=edit&_fields=status,content`,
@@ -152,7 +163,9 @@ with sync_playwright() as pw:
         else:
             img = {k: f"{site.url}/wp-content/uploads/YYYY/MM/{p.name}" for k, (p, _) in SHOTS.items()}
             icons = {n: f"{site.url}/wp-content/uploads/YYYY/MM/audit-icon2-{n}.png" for n in ICONS}
-        new = build(original, img, icons)
+        import json
+        minh = json.loads(MINH.read_text()) if MINH.exists() else {}
+        new = build(original, img, icons, minh)
         words = T.visible_words(new)
         lost = [seg for seg in T.text_segments(original) if seg not in words]
         if lost:

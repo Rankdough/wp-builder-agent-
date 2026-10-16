@@ -31,9 +31,9 @@ SHOTS = {
     "hero": (LP / "seo-audit-summary-t.png",
              "Example SEO and content audit summary: checks, critical fixes, pages with a verdict and the first three "
              "fixes ranked by priority"),
-    "content": (LP / "content-audit-example.png",
-                "Example content audit: pages scored on Search Console data with keep, improve, merge or remove "
-                "verdicts"),
+    "content": (LP / "content-chat-example.png",
+                "Example: Claude reading Search Console data to score pages and mark them keep, improve, merge or "
+                "remove"),
 }
 ICONS = ["growth", "link", "shield", "window", "bars", "cart", "pie", "zap", "target", "merge", "flag", "quote",
          "search", "file"]
