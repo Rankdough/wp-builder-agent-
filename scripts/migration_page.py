@@ -68,7 +68,12 @@ def build(raw, img, icons, minh):
         raise SystemExit(f"Sections not found: {missing}")
     code = {n: code_bodies(by[n])[0] for n in need[:-1]}
 
-    hero = T.swap_header_form(secs[0], img["plan"], SHOTS["plan"][1])
+    h0 = secs[0]
+    h1 = find(r"<h1>(.*?)</h1>", h0, 1)[0]
+    paras = "".join(f"<p>{x}</p>" for x in find(r"<p>(.*?)</p>", h0, 2))
+    btn = re.search(r'button_url="([^"]*)" button_text="([^"]*)"', h0)
+    hero = T.hero(["Platform moves", "Domain changes", "Redesigns"], h1, paras, (btn.group(2), btn.group(1)),
+                  ("See What Is Included", "#included"), img["plan"], SHOTS["plan"][1])
 
     h2, lead = head(code["Migration types"])
     types = find(r"<h3>(.*?)</h3><p>(.*?)</p>", code["Migration types"], 4)
@@ -104,7 +109,7 @@ def build(raw, img, icons, minh):
         icons, ("checksq", "Six stages. One controlled migration.",
                 "A clear plan, fewer surprises and a safer launch for the pages that earn.",
                 ("Talk to Us Before You Launch", "#contact")),
-        pills=None)  # platforms now sit in the risks section
+        pills=None, css_id="included")  # platforms sit in the risks section
     st = {t: (ic, t, f"<p>{b}</p>") for ic, (_, t, b) in zip(("search", "route", "file", "share", "window", "activity"), stages)}
     names = [t for _, t, _ in stages]
     changes = T.outcomes("Migration outcomes", "What changes after your migration", [

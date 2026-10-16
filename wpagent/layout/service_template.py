@@ -57,6 +57,7 @@ def button_row(text, url):
 
 
 def section(label, rows, bg="#000000", pad=70, css_id=None):
+    rows = re.sub(r'\[et_pb_row (?![^\]]*max_width)', f'[et_pb_row max_width="{ROW_W}" ', rows)
     mid = f' module_id="{css_id}"' if css_id else ""
     return (f'[et_pb_section fb_built="1" admin_label="{attr(label)}"{mid} {V} background_color="{bg}" '
             f'custom_padding="{pad}px||{pad}px|||"]{rows}[/et_pb_section]')
@@ -233,10 +234,10 @@ def pill_row(label, items):
             f'<ul>{"".join(f"<li>{x}</li>" for x in items)}</ul>[/et_pb_text][/et_pb_column][/et_pb_row]')
 
 
-def timeline_section(label, eyebrow, h2, lead_html, phases, icons, banner, pills=None):
+def timeline_section(label, eyebrow, h2, lead_html, phases, icons, banner, pills=None, css_id=None):
     """banner: (icon, title, body, (button text, url)). pills: (label, [items]) or None."""
     rows = eyebrow_heading(eyebrow, h2, lead_html) + timeline(phases, icons) + cta_banner(*banner[:3], banner[3], icons)
-    return section(label, rows + (pill_row(*pills) if pills else ""))
+    return section(label, rows + (pill_row(*pills) if pills else ""), css_id=css_id)
 
 
 def numbered_items(eyebrow, h2, lead_html, cta, items, icons, footer_label=None, footer_items=None):
@@ -279,7 +280,7 @@ def check_panel(rows, label="Illustrative check"):
     return f'<div class="rd-check"><p>{label}</p><table>{tr}</table></div>'
 
 
-def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=None, footer_items=None):
+def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=None, footer_items=None, css_id=None):
     """Left: eyebrow with a red rule, heading, intro, button, then an optional small list (e.g. platforms).
     Right: numbered accordion (Toggle modules, rd-acc), first item open. items: [(title, body_html)]."""
     foot = ""
@@ -310,4 +311,34 @@ def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=No
     right = f'[et_pb_column type="3_5" {V}]{toggles}[/et_pb_column]'
     row = (f'[et_pb_row column_structure="2_5,3_5" use_custom_gutter="on" gutter_width="4" {V}]'
            f"{left}{right}[/et_pb_row]")
-    return section(label, row)
+    return section(label, row, css_id=css_id)
+
+
+ROW_W = "1120px"  # content width for template rows: leaves room either side so text never runs to the screen edge
+
+
+def hero(pills, h1, intro_html, primary, secondary, img, img_alt):
+    """Page header in the GSC Connector style: red pills, H1, intro, a red button and an outline button on the left;
+    the graphic in a red dotted frame on the right; red glow top right. Copy is the page's own."""
+    pill_mod = (f'[et_pb_text module_class="rd-pills rd-pills--red" {V} custom_margin="||12px||false|false"]'
+                f'<ul>{"".join(f"<li>{p}</li>" for p in pills)}</ul>[/et_pb_text]')
+    text = (f'[et_pb_text {V} text_text_color="#ffffff" text_font_size="18px" text_line_height="1.7em" '
+            f'header_text_color="#ffffff" header_font_size="48px" header_line_height="1.1em" '
+            f'header_font_size_tablet="38px" header_font_size_phone="32px" header_font_size_last_edited="on|phone" '
+            f'custom_margin="||26px||false|false"]<h1>{h1}</h1>{intro_html}[/et_pb_text]')
+    btn2 = (f'[et_pb_button button_url="{secondary[1]}" button_text="{attr(secondary[0])}" button_alignment="left" {V} '
+            f'custom_button="on" button_text_size="16px" button_text_color="#ffffff" button_border_width="1px" '
+            f'button_border_color="#b3b3b3" button_border_radius="8px" button_on_hover="off" '
+            f'custom_margin="12px||||false|false"][/et_pb_button]')
+    left = f'[et_pb_column type="3_5" {V}]{pill_mod}{text}{button(primary[0], primary[1], align="left")}{btn2}[/et_pb_column]'
+    right = (f'[et_pb_column type="2_5" {V} custom_padding="14px|14px|14px|14px|false|false" '
+             f'border_radii="on|18px|18px|18px|18px" border_width_all="3px" border_color_all="{RED}" '
+             f'border_style_all="dotted"][et_pb_image src="{img}" alt="{attr(img_alt)}" title_text="{attr(img_alt)}" '
+             f'{V} border_radii="on|10px|10px|10px|10px"][/et_pb_image][/et_pb_column]')
+    row = (f'[et_pb_row column_structure="3_5,2_5" {V} max_width="{ROW_W}" '
+           f'custom_padding="0px|0px|0px|0px|false|false"]{left}{right}[/et_pb_row]')
+    return (f'[et_pb_section fb_built="1" admin_label="Hero" {V} background_color="#000000" '
+            f'use_background_color_gradient="on" background_color_gradient_type="circular" '
+            f'background_color_gradient_direction_radial="top right" '
+            f'background_color_gradient_stops="rgba(224,43,32,0.28) 0%|rgba(0,0,0,0) 55%" '
+            f'custom_padding="90px||80px|||"]{row}[/et_pb_section]')
