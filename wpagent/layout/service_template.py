@@ -237,3 +237,37 @@ def timeline_section(label, eyebrow, h2, lead_html, phases, icons, banner, pills
     """banner: (icon, title, body, (button text, url)). pills: (label, [items]) or None."""
     rows = eyebrow_heading(eyebrow, h2, lead_html) + timeline(phases, icons) + cta_banner(*banner[:3], banner[3], icons)
     return section(label, rows + (pill_row(*pills) if pills else ""))
+
+
+def numbered_items(eyebrow, h2, lead_html, cta, items, icons, footer_label=None, footer_items=None):
+    """Specialty section: intro on the left (eyebrow, big heading, intro, button); on the right a two-column grid of
+    numbered items (rd-risk: big grey number with an icon, short red line, title, text). items: [(icon, title, body)].
+    Optional footer line, e.g. 'Platforms we migrate' with names."""
+    left = (f'[et_pb_column type="1_3" {V}]'
+            f'[et_pb_text {V} text_text_color="{RED}" text_font="|700||on|||||" text_font_size="12px" '
+            f'text_letter_spacing="0.22em" custom_margin="||14px||false|false"]<p>{eyebrow}</p>[/et_pb_text]'
+            f'[et_pb_text {V} header_2_text_color="#ffffff" header_2_font_size="56px" header_2_line_height="1.05em" '
+            f'text_text_color="#b8bec6" text_font_size="18px" text_line_height="1.65em" '
+            f'custom_margin="||28px||false|false"]<h2>{h2}</h2>{lead_html}[/et_pb_text]'
+            f"{button(cta[0], cta[1], align='left')}[/et_pb_column]")
+    rows = ""
+    for i in range(0, len(items), 2):
+        cols = ""
+        for n, (ic, t, b) in enumerate(items[i:i + 2], start=i + 1):
+            cols += (f'[et_pb_column_inner type="1_2" saved_specialty_column_type="2_3" {V}]'
+                     f'[et_pb_text module_class="rd-risk" {V} text_text_color="#b8bec6" text_font_size="15px" '
+                     f'text_line_height="1.65em"]<p>{n:02d} <img src="{icons[ic]}" alt="" width="34" height="34" /></p>'
+                     f"<h3>{t}</h3>{b}[/et_pb_text][/et_pb_column_inner]")
+        rows += (f'[et_pb_row_inner use_custom_gutter="on" gutter_width="3" {V} custom_padding="0px||28px|||"]'
+                 f"{cols}[/et_pb_row_inner]")
+    right = (f'[et_pb_column type="2_3" specialty_columns="2" {V} border_width_left="1px" border_color_left="#2a2f36" '
+             f'custom_padding="0px||0px|48px|false|false"]{rows}[/et_pb_column]')
+    out = (f'[et_pb_section fb_built="1" specialty="on" admin_label="Numbered items" {V} background_color="#000000" '
+           f'custom_padding="80px||40px|||"]{left}{right}[/et_pb_section]')
+    if footer_label:
+        line = (f'<p><strong>{footer_label}</strong>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{" &middot; ".join(footer_items)}</p>')
+        out += section("Numbered items footer",
+                       f'[et_pb_row {V} custom_padding="20px||0px|||" border_width_top="1px" border_color_top="#23272d"]'
+                       f'[et_pb_column type="4_4" {V}][et_pb_text {V} text_orientation="right" text_text_color="#d4d8dd" '
+                       f'text_font_size="13px"]{line}[/et_pb_text][/et_pb_column][/et_pb_row]', pad=20)
+    return out
