@@ -28,7 +28,7 @@ SHOTS = {
     "ppt": (LP / "proplayerteam-migration-chart2.png", "ProPlayerTeam organic clicks before and after its move to "
             "Shopify (Search Console)"),
 }
-ICONS = ["copy", "file", "layout", "unlink", "bars", "activity", "search", "cart", "growth", "shield", "window",
+ICONS = ["target", "copy", "file", "layout", "unlink", "bars", "activity", "search", "cart", "growth", "shield", "window",
          "checksq"]
 ISSUES = [  # Shopify-specific, accurate to how the platform works
     ("Duplicate product URLs", "<p>Shopify serves every product at /products/ and again under each collection path. "
@@ -55,6 +55,25 @@ ISSUES = [  # Shopify-specific, accurate to how the platform works
 ]
 
 
+FAQ = [
+    ("Is Shopify bad for SEO?", "No. Shopify handles the basics well: clean URLs, sitemaps, HTTPS and editable titles. "
+     "Most problems come from how a store is set up, such as duplicate product URLs, thin collections and heavy apps."),
+    ("Do you work with Shopify Plus?", "Yes. We work with Shopify and Shopify Plus stores, from single-brand shops to "
+     "enterprise retailers."),
+    ("Do you need access to our store?", "Not for the free video audit: we look at your store the way a visitor and "
+     "Google see it. For ongoing work we ask for staff access to Shopify and to Search Console."),
+    ("How much does Shopify SEO cost?", "It depends on the size of the store and how much work it needs. We agree "
+     "scope and price on a call."),
+]
+
+
+def faq_jsonld():
+    import json
+    data = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+        {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]}
+    return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False) + "</script>"
+
+
 def strip(h):
     return re.sub(r"<[^>]+>", "", h).strip()
 
@@ -65,29 +84,47 @@ def build(raw, img, icons):
     h1a, h1b = [strip(x) for x in re.findall(r"<h1[^>]*>(.*?)</h1>", t0, re.S) if strip(x)]
     intro = f"<p>{strip(t1)}</p>"
     benefit_h2 = html.unescape(re.search(r'\[et_pb_heading title="([^"]*)"', raw).group(1))
-    benefit = "".join(f"<p>{strip(p)}</p>" for p in re.findall(r"<p[^>]*>(.*?)</p>", t2, re.S) if strip(p))
+    benefit = [strip(p) for p in re.findall(r"<p[^>]*>(.*?)</p>", t2, re.S) if strip(p)]
     why_h2 = strip(re.search(r"<h2[^>]*>(.*?)</h2>", t3, re.S).group(1))
     why = [strip(p) for p in re.findall(r"<p>(.*?)</p>", t3, re.S)]
     us_h2 = strip(re.search(r"<h2[^>]*>(.*?)</h2>", t4, re.S).group(1))
     us = "".join("<p>" + re.sub(r"</?span[^>]*>", "", p).replace("<b>", "<strong>").replace("</b>", "</strong>") + "</p>"
                  for p in re.findall(r"<p>(.*?)</p>", t4, re.S))
+    texts_all = [m.group(1) for m in re.finditer(r"\[et_pb_text[^\]]*\](.*?)\[/et_pb_text\]", raw, re.S)]
+    c_h2 = strip(re.search(r"<h2[^>]*>(.*?)</h2>", texts_all[-2], re.S).group(1))
+    c_lead = strip(re.search(r"<p[^>]*>(.*?)</p>", texts_all[-1], re.S).group(1))
 
     hero = T.hero(["Shopify", "Shopify Plus", "Revenue, not just traffic"], f"{h1a} {h1b}", intro, CONTACT,
                   ("See What We Fix", "#issues"), img["hero"], SHOTS["hero"][1])
-    fit = T.feature("Is Shopify SEO for you", img["chat"], SHOTS["chat"][1], False, benefit_h2, benefit, [], icons,
-                    CONTACT, pills=("A good fit if you", ["Already sell on Shopify", "Run paid ads that convert",
-                                                          "Have products people search for", "Use Shopify or Shopify Plus"]))
+    who = T.cards_section("Can I benefit", benefit_h2, "", [
+        ("target", "Product market fit first", f"<p>{benefit[0]}</p>"),
+        ("cart", "Already selling or running ads", f"<p>{benefit[1]}</p>"),
+        ("window", "Pages that convert better", f"<p>{benefit[2]}</p>")], icons)
     issues = T.accordion_section(
         "Shopify issues", "What we fix", "Shopify SEO Problems We Fix",
         "<p>Shopify handles the basics. These are the store-level issues that hold rankings and sales back, and we "
         "check every one.</p>", CONTACT,
         [(t, b + T.check_panel(rows)) for t, b, rows in ISSUES], css_id="issues")
+    process = T.timeline_section(
+        "How we start", why_h2, why[0], f"<p>{why[1]}</p>",
+        [("Video audit", [("search", "In your own time", f"<p>{why[2]}</p>"),
+                          ("window", "No pressure", f"<p>{why[3]} {why[4]}</p>")]),
+         ("Plan", [("bars", "A ranked fix list", "<p>Every issue on your store ranked by what it is worth to revenue, "
+                    "with the effort and who owns it.</p>"),
+                   ("file", "Collections first", "<p>We start with the collections and products closest to page one. "
+                    "They usually move fastest.</p>")]),
+         ("Grow", [("growth", "Fixes go live", "<p>We work with your team or your developers to ship the fixes and "
+                    "the new copy.</p>"),
+                   ("activity", "Measured on revenue", "<p>Rankings, clicks and sales from organic search, reported by "
+                    "collection and product.</p>")])],
+        icons, ("checksq", why[5], "One of our lead team looks at your store and sends you a short video.", CONTACT))
     proof = T.proof("ProPlayerTeam result", "Shopify result", "+104%",
                     "ProPlayerTeam: Organic Clicks Up 104% in Two Months After Moving to Shopify",
                     "<p>We ran the SEO side of ProPlayerTeam's move to Shopify. Organic clicks rose 104% in the two "
                     "months after launch.</p>", img=img["ppt"], img_alt=SHOTS["ppt"][1], image_left=True)
-    why_us = T.section("Why us", T.text_row(f"<h2>{us_h2}</h2>{us}", align="left", size=18, pad="0px||10px|||")
-                       + T.cta_banner("checksq", why_h2 + " " + why[0], " ".join(why[1:]), CONTACT, icons))
+    why_us = T.feature("Why us", img["chat"], SHOTS["chat"][1], True, us_h2, us, [], icons, CONTACT,
+                       pills=("What we work on", ["Collections", "Product pages", "Site speed", "Structured data",
+                                                  "Internal links", "Shopify Plus"]))
     item = lambda k, ic: (ic, ISSUES[k][0], ISSUES[k][1])
     changes = T.outcomes("Shopify outcomes", "What changes after Shopify SEO", [
         ("search", "Get found", "<p>Google indexes the pages that sell, not thousands of filter and duplicate URLs."
@@ -97,13 +134,10 @@ def build(raw, img, icons):
         ("growth", "Keep growing", "<p>A faster, cleaner store that holds its rankings as you add products.</p>",
          [item(3, "activity"), item(5, "shield")]),
     ], icons, CONTACT)
-    secs = [m.start() for m in re.finditer(r"\[et_pb_section[\s\]]", raw)]
-    footer = raw[secs[-1]:]
-    if 'admin_label="Footer"' not in footer[:600]:
-        raise SystemExit("Final contact section not found")
-    if 'module_id="contact"' not in footer[:600]:
-        footer = footer.replace('admin_label="Footer"', 'admin_label="Footer" module_id="contact"', 1)
-    return hero + fit + issues + proof + why_us + changes + footer
+    faq = T.faq("Shopify FAQ", "Shopify SEO: Frequently Asked Questions", "<p>Quick answers before you get in touch.</p>",
+                [(q, f"<p>{a}</p>") for q, a in FAQ], jsonld=faq_jsonld())
+    contact = T.contact_section(c_h2, c_lead)
+    return hero + who + issues + process + proof + why_us + changes + faq + contact
 
 
 FETCH = """async (id) => (await (await fetch(`/wp-json/wp/v2/pages/${id}?context=edit&_fields=status,content`,
@@ -114,6 +148,9 @@ args = [a for a in sys.argv[1:] if not a.startswith("--confirm-site")]
 confirm = sys.argv[sys.argv.index("--confirm-site") + 1] if "--confirm-site" in sys.argv else None
 if confirm:
     args.remove(confirm)
+source = None
+if "--source" in args:  # read the wording from this page, write to page_id (e.g. live page -> draft)
+    i = args.index("--source"); source = int(args[i + 1]); del args[i:i + 2]
 page_id, live = int(args[0]), confirm == site.name
 log = RunLog(site.name, "shopify-page" if live else "shopify-page-dry")
 with sync_playwright() as pw:
@@ -124,8 +161,8 @@ with sync_playwright() as pw:
         s.login()
         s.goto("/wp-admin/")
         page = s.page.evaluate(FETCH, page_id)
-        raw = page["content"]["raw"]
-        (log.backup / f"{page_id}-before.txt").write_text(raw, encoding="utf-8")
+        (log.backup / f"{page_id}-before.txt").write_text(page["content"]["raw"], encoding="utf-8")
+        raw = s.page.evaluate(FETCH, source)["content"]["raw"] if source else page["content"]["raw"]
         if live:
             media = {k: upload_image(s, p) for k, (p, _) in SHOTS.items()}
             for k, m in media.items():

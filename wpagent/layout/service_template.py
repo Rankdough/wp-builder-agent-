@@ -20,7 +20,7 @@ def attr(text: str) -> str:
 
 def blurb(icon, title, body_html, place="top", card=False, title_size=19, extra=""):
     return (f'[et_pb_blurb title="{attr(title)}" image="{icon}" alt="" use_icon="off" icon_placement="{place}" '
-            f'image_icon_width="64px" icon_alignment="left" text_orientation="left" {V} header_level="h3" '
+            f'image_icon_width="64px" icon_alignment="left" text_orientation="left" content_max_width="100%" {V} header_level="h3" '
             f'header_text_color="#ffffff" header_font_size="{title_size}px" header_line_height="1.3em" '
             f'body_text_color="#b8bec6" body_font_size="15px" body_line_height="1.7em" {CARD if card else ""} '
             f'{extra}]{body_html}[/et_pb_blurb]')
@@ -80,13 +80,15 @@ def feature(label, img, img_alt, image_left, h2, lead_html, cards, icons, cta, p
     """Graphic + heading/intro/pill card, then optional centred heading, icon card grid and button."""
     text_col = (f'[et_pb_column type="3_5" {V}][et_pb_text {V} text_text_color="#b8bec6" text_font_size="18px" '
                 f'text_line_height="1.65em" header_2_text_color="#ffffff" custom_margin="||24px||false|false"]'
-                f"<h2>{h2}</h2>{lead_html}[/et_pb_text]{pill_card(*pills, min_height=min_height) if pills else ''}[/et_pb_column]")
+                f"<h2>{h2}</h2>{lead_html}[/et_pb_text]{pill_card(*pills, min_height=min_height) if pills else ''}"
+                # no card grid: the button sits under the text, never alone under an empty grid
+                f"{'' if cards else button(cta[0], cta[1], align='left')}[/et_pb_column]")
     img_col = (f'[et_pb_column type="2_5" {V}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
                f'title_text="{attr(img_alt)}" {V}][/et_pb_image][/et_pb_column]')
     top = (f'[et_pb_row column_structure="{"2_5,3_5" if image_left else "3_5,2_5"}" module_class="rd-level" make_equal="on" {V} custom_padding="0px||30px|||"]'
            f"{img_col + text_col if image_left else text_col + img_col}[/et_pb_row]")
     grid_head = text_row(f"<h2>{grid_h2}</h2>") if grid_h2 else ""
-    return section(label, top + grid_head + card_rows(cards, icons) + button_row(*cta))
+    return section(label, top + (grid_head + card_rows(cards, icons) + button_row(*cta) if cards else ""))
 
 
 def cards_section(label, h2, lead_html, cards, icons, note_html=None):
@@ -342,3 +344,15 @@ def hero(pills, h1, intro_html, primary, secondary, img, img_alt):
             f'background_color_gradient_direction_radial="top right" '
             f'background_color_gradient_stops="rgba(224,43,32,0.28) 0%|rgba(0,0,0,0) 55%" '
             f'custom_padding="90px||80px|||"]{row}[/et_pb_section]')
+
+
+def contact_section(h2, lead, form='[form id="824"]', label="Contact", bg="#0b0d10"):
+    """Closing contact section in the template style: bold heading and readable intro on the left, the form in a
+    card on the right. Replaces the old footer block whose intro text was black on black."""
+    left = (f'[et_pb_column type="2_5" {V}][et_pb_text {V} text_text_color="#b8bec6" text_font_size="18px" '
+            f'text_line_height="1.65em" header_2_text_color="#ffffff" header_2_font_size="40px" '
+            f'header_2_line_height="1.15em"]<h2>{h2}</h2><p>{lead}</p>[/et_pb_text][/et_pb_column]')
+    right = (f'[et_pb_column type="3_5" {V} {CARD}][et_pb_code {V}]{form}[/et_pb_code][/et_pb_column]')
+    row = (f'[et_pb_row column_structure="2_5,3_5" use_custom_gutter="on" gutter_width="4" {V}]{left}{right}'
+           "[/et_pb_row]")
+    return section(label, row, bg=bg, css_id="contact")
