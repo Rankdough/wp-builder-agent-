@@ -124,9 +124,7 @@ def build(raw, img, icons):
                     "ProPlayerTeam: Organic Clicks Up 104% in Two Months After Moving to Shopify",
                     "<p>We ran the SEO side of ProPlayerTeam's move to Shopify. Organic clicks rose 104% in the two "
                     "months after launch.</p>", img=img["ppt"], img_alt=SHOTS["ppt"][1], image_left=True)
-    why_us = T.feature("Why us", img["chat"], SHOTS["chat"][1], True, us_h2, us, [], icons, CONTACT,
-                       pills=("What we work on", ["Collections", "Product pages", "Site speed", "Structured data",
-                                                  "Internal links", "Shopify Plus"]))
+    why_us = T.feature("Why us", img["chat"], SHOTS["chat"][1], True, us_h2, us, [], icons, CONTACT)
     item = lambda k, ic: (ic, ISSUES[k][0], ISSUES[k][1])
     changes = T.outcomes("Shopify outcomes", "What changes after Shopify SEO", [
         ("search", "Get found", "<p>Google indexes the pages that sell, not thousands of filter and duplicate URLs."

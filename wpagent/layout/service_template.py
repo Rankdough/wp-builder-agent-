@@ -1,7 +1,14 @@
 """Rank Dough service page template (Oct 2026), as native Divi shortcodes. The same design as the Website SEO Audits
 page: icon cards (Blurb modules, card styling on the column so rows even out), feature sections (graphic one side,
 heading, intro and pill card the other, then a grid of icon cards and a centred button), a proof band, and an FAQ
-built from Toggle modules with the page's JSON-LD in one data-only Code module. Only design settings, no CSS."""
+built from Toggle modules with the page's JSON-LD in one data-only Code module. Only design settings, no CSS.
+
+Rules every page follows:
+1. Two-column rows always end level (rd-level). A graphic sits in a red dotted frame that stretches to the text
+   height, centred. If the graphic fills under 60% of its frame, the text beside it is too long: trim it.
+   scripts/check_levels.py measures this on the rendered page after every build.
+2. Graphics alternate sides down the page (alternate_images), starting right in the header.
+3. Copy is passed in per page so it fits that page; nothing is shared word for word between pages."""
 from __future__ import annotations
 
 import html
@@ -11,6 +18,8 @@ V = '_builder_version="4.27.4" _module_preset="default" global_colors_info="{}" 
 CARD = ('background_color="#111316" custom_padding="28px|28px|28px|28px|false|false" '
         'border_radii="on|16px|16px|16px|16px" border_width_all="1px" border_color_all="#23272d" border_style_all="solid"')
 RED = "#e02b20"
+FRAME = ('custom_padding="18px|18px|18px|18px|false|false" border_radii="on|18px|18px|18px|18px" '
+         'border_width_all="3px" border_color_all="#e02b20" border_style_all="dotted"')
 
 
 def attr(text: str) -> str:
@@ -83,8 +92,9 @@ def feature(label, img, img_alt, image_left, h2, lead_html, cards, icons, cta, p
                 f"<h2>{h2}</h2>{lead_html}[/et_pb_text]{pill_card(*pills, min_height=min_height) if pills else ''}"
                 # no card grid: the button sits under the text, never alone under an empty grid
                 f"{'' if cards else button(cta[0], cta[1], align='left')}[/et_pb_column]")
-    img_col = (f'[et_pb_column type="2_5" {V}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
-               f'title_text="{attr(img_alt)}" {V}][/et_pb_image][/et_pb_column]')
+    # graphic in the red dotted frame (as in the header); the frame stretches to the text height, graphic centred
+    img_col = (f'[et_pb_column type="2_5" {V} {FRAME}][et_pb_image src="{img}" alt="{attr(img_alt)}" '
+               f'title_text="{attr(img_alt)}" align="center" {V}][/et_pb_image][/et_pb_column]')
     top = (f'[et_pb_row column_structure="{"2_5,3_5" if image_left else "3_5,2_5"}" module_class="rd-level" make_equal="on" {V} custom_padding="0px||30px|||"]'
            f"{img_col + text_col if image_left else text_col + img_col}[/et_pb_row]")
     grid_head = text_row(f"<h2>{grid_h2}</h2>") if grid_h2 else ""
