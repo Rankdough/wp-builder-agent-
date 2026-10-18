@@ -104,7 +104,9 @@ def build(raw, img, icons):
         "Shopify issues", "What we fix", "Shopify SEO Problems We Fix",
         "<p>Shopify handles the basics. These are the store-level issues that hold rankings and sales back, and we "
         "check every one.</p>", CONTACT,
-        [(t, b + T.check_panel(rows)) for t, b, rows in ISSUES], css_id="issues")
+        [(t, b + T.check_panel(rows)) for t, b, rows in ISSUES], css_id="issues",
+        footer_label="What we check", footer_items=["Product URLs", "Collections", "Tag filters", "Apps and speed",
+                                                     "Structured data", "robots.txt"])
     process = T.timeline_section(
         "How we start", why_h2, why[0], f"<p>{why[1]}</p>",
         [("Video audit", [("search", "In your own time", f"<p>{why[2]}</p>"),
@@ -137,7 +139,7 @@ def build(raw, img, icons):
     faq = T.faq("Shopify FAQ", "Shopify SEO: Frequently Asked Questions", "<p>Quick answers before you get in touch.</p>",
                 [(q, f"<p>{a}</p>") for q, a in FAQ], jsonld=faq_jsonld())
     contact = T.contact_section(c_h2, c_lead)
-    return hero + who + issues + process + proof + why_us + changes + faq + contact
+    return T.alternate_images(hero + who + issues + process + proof + why_us + changes + faq + contact)
 
 
 FETCH = """async (id) => (await (await fetch(`/wp-json/wp/v2/pages/${id}?context=edit&_fields=status,content`,

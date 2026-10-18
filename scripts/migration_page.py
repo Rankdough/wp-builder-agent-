@@ -194,7 +194,7 @@ with sync_playwright() as pw:
         lost = [seg for seg in T.text_segments(original) if seg not in words and seg not in DROPPED]
         if lost:
             raise SystemExit("Text would be lost: " + " | ".join(lost[:10]))
-        if "<style" in new or new.count("[et_pb_code") != 2:
+        if "<style" in new or new.count("[et_pb_code") - new.count("Open first answer on scroll") != 2:
             raise SystemExit("Expected no CSS and only two Code modules (JSON-LD and the contact form)")
         (log.dir / f"{page_id}-after.txt").write_text(new, encoding="utf-8")
         print(f"All {len(T.text_segments(original))} text pieces kept. No CSS. {len(original)} -> {len(new)} chars.")

@@ -282,16 +282,28 @@ def check_panel(rows, label="Illustrative check"):
     return f'<div class="rd-check"><p>{label}</p><table>{tr}</table></div>'
 
 
-def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=None, footer_items=None, css_id=None):
+REVEAL_FIRST = (  # opens the section's first toggle 2s after it scrolls into view; no square brackets or && (Divi)
+    "<script>(function(){var s=document.currentScript;function go(){var sec=s.closest('.et_pb_section');if(!sec)return;"
+    "var t=sec.querySelector('.rd-acc--first');if(!t)return;if(!('IntersectionObserver' in window))return;"
+    "var o=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;o.disconnect();"
+    "setTimeout(function(){if(t.classList.contains('et_pb_toggle_close')){t.querySelector('.et_pb_toggle_title')"
+    ".click();}},2000);});},{threshold:0.35});o.observe(t);}"
+    "if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',go);}else{go();}})();</script>")
+
+
+def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=None, footer_items=None, css_id=None,
+                      reveal_first=True):
     """Left: eyebrow with a red rule, heading, intro, button, then an optional small list (e.g. platforms).
-    Right: numbered accordion (Toggle modules, rd-acc), first item open. items: [(title, body_html)]."""
+    Right: numbered accordion (Toggle modules, rd-acc). reveal_first: all closed, the first opens 2s after the section
+    scrolls into view (small script in a Code module); otherwise the first starts open. items: [(title, body_html)]."""
     foot = ""
     if footer_label:
         foot = (f'[et_pb_text {V} text_text_color="#d4d8dd" text_font_size="16px" text_line_height="1.8em" '
                 f'custom_margin="36px||||false|false" custom_padding="26px||||false|false" border_width_top="1px" '
                 f'border_color_top="#23272d"]<p><span style="color: #64748b; font-size: 11px; letter-spacing: 0.2em;">'
                 f'{footer_label.upper()}</span><br />{" &middot; ".join(footer_items)}</p>[/et_pb_text]')
-    left = (f'[et_pb_column type="2_5" {V}]'
+    script = f'[et_pb_code admin_label="Open first answer on scroll" {V}]{REVEAL_FIRST}[/et_pb_code]' if reveal_first else ""
+    left = (f'[et_pb_column type="2_5" {V}]{script}'
             f'[et_pb_text module_class="rd-eyebrow" {V} text_text_color="{RED}" text_font="|700||on|||||" '
             f'text_font_size="12px" text_letter_spacing="0.22em" custom_margin="||16px||false|false"]<p>{eyebrow}</p>'
             f'[/et_pb_text][et_pb_text {V} header_2_text_color="#ffffff" header_2_font_size="40px" '
@@ -302,11 +314,11 @@ def accordion_section(label, eyebrow, h2, lead_html, cta, items, footer_label=No
     for i, (t, body) in enumerate(items):
         cls = "rd-acc rd-acc--first" if i == 0 else "rd-acc"
         top = f'border_width_top="1px" border_color_top="{RED}" ' if i == 0 else ""
-        toggles += (f'[et_pb_toggle title="{attr(t)}"{" open=\"on\"" if i == 0 else ""} module_class="{cls}" {V} '
+        toggles += (f'[et_pb_toggle title="{attr(t)}"{" open=\"on\"" if i == 0 and not reveal_first else ""} module_class="{cls}" {V} '
                     f'open_toggle_background_color="rgba(0,0,0,0)" closed_toggle_background_color="rgba(0,0,0,0)" '
                     f'title_text_color="#ffffff" closed_title_text_color="#ffffff" title_font_size="20px" '
                     f'title_level="h3" body_text_color="#b8bec6" body_font_size="16px" icon_color="#94a3b8" '
-                    f'open_icon_color="{RED}" border_radii="on|0px|0px|0px|0px" border_width_all="0px" '
+                    f'open_icon_color="#94a3b8" border_radii="on|0px|0px|0px|0px" border_width_all="0px" '
                     f'border_width_bottom="1px" border_color_bottom="#23272d" {top}'
                     f'custom_padding="22px|0px|22px|0px|false|false" custom_margin="||0px||false|false"]'
                     f"{body}[/et_pb_toggle]")
@@ -356,3 +368,30 @@ def contact_section(h2, lead, form='[form id="824"]', label="Contact", bg="#0b0d
     row = (f'[et_pb_row column_structure="2_5,3_5" use_custom_gutter="on" gutter_width="4" {V}]{left}{right}'
            "[/et_pb_row]")
     return section(label, row, bg=bg, css_id="contact")
+
+
+def _columns(row_body):
+    """Split a row's inside into its top-level [et_pb_column] blocks (inner columns use et_pb_column_inner)."""
+    return re.findall(r"\[et_pb_column [^\]]*\].*?\[/et_pb_column\]", row_body, re.S)
+
+
+def alternate_images(layout):
+    """Template rule: every section with a graphic beside text puts the graphic on the opposite side to the previous
+    one. The header graphic is on the right, so the next goes left, then right, and so on."""
+    out, want = [], None
+    starts = [m.start() for m in re.finditer(r"\[et_pb_section[\s\]]", layout)]
+    for a, b in zip(starts, starts[1:] + [len(layout)]):
+        sec = layout[a:b]
+        m = re.search(r'(\[et_pb_row [^\]]*?column_structure=")(2_5,3_5|3_5,2_5)("[^\]]*\])(.*?)(\[/et_pb_row\])', sec, re.S)
+        cols = _columns(m.group(4)) if m else []
+        img_at = [i for i, c in enumerate(cols) if "[et_pb_image" in c and 'type="2_5"' in c[:60]]
+        if m and len(cols) == 2 and len(img_at) == 1:
+            side = "left" if img_at[0] == 0 else "right"
+            want = want or side  # first graphic (the header) sets the starting side
+            if side != want:
+                flipped = "3_5,2_5" if m.group(2) == "2_5,3_5" else "2_5,3_5"
+                row = m.group(1) + flipped + m.group(3) + cols[1] + cols[0] + m.group(5)
+                sec = sec[:m.start()] + row + sec[m.end():]
+            want = "left" if want == "right" else "right"
+        out.append(sec)
+    return layout[:starts[0]] + "".join(out) if starts else layout
