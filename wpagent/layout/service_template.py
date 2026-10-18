@@ -133,7 +133,7 @@ def faq(label, h2, lead_html, qa, jsonld=None, bg="#0b0d10"):
     for i, (q, a) in enumerate(qa):
         toggles += (f'[et_pb_toggle title="{attr(q)}"{" open=\"on\"" if i == 0 else ""} '
                     f'open_toggle_background_color="#14171b" closed_toggle_background_color="#14171b" '
-                    f'icon_color="{RED}" {V} title_text_color="#ffffff" title_font_size="19px" title_level="h3" body_text_color="#d4d8dd" '
+                    f'icon_color="{RED}" {V} title_text_color="#ffffff" title_font_size="18px" title_level="h3" body_text_color="#d4d8dd" body_font_size="16px" '
                     f'background_color="#14171b" custom_margin="||12px||false|false" '
                     f'custom_padding="20px|24px|20px|24px|false|false" border_radii="on|14px|14px|14px|14px" '
                     f'border_width_all="1px" border_color_all="{RED if i == 0 else "#23272d"}" border_style_all="solid"]'
