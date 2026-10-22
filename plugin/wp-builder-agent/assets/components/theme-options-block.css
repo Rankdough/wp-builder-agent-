@@ -1,0 +1,33 @@
+/* wp-builder-agent: reusable components. Added 2026-10-09. Use via a Text module's Advanced > CSS Class.
+   rd-pills: a bullet list shows as pills. Add rd-pills--red for the red uppercase hero tags.
+   rd-pills--lg: bigger pills for feature cards (added 2026-10-15).
+   rd-pills--center: centred pills with dots between (platform rows).
+   rd-phase: timeline label with a red dot on a line; add rd-phase--first / rd-phase--last on the end columns.
+   rd-label-lines: a small uppercase label with a line either side.
+   rd-risk: numbered item, first paragraph is a big grey number plus an icon image, h3 gets a short red line.
+   rd-acc: numbered accordion item (Toggle module); add rd-acc--first on the first one.
+   rd-check: small check panel inside a toggle (a label p, then a table; b.ok / b.warn badges).
+   rd-eyebrow: eyebrow line with a short red rule after it.
+   rd-level (on a row with equal heights): the last module in the shorter column stretches so both columns end level;
+   rd-level--spread also stretches every module in the right column evenly (accordions).
+   rd-steps: a numbered list shows red number circles. */
+.rd-pills ul{list-style:none;margin:0;padding:0!important;display:flex;flex-wrap:wrap;gap:8px}
+.rd-pills li{padding:6px 12px;border:1px solid #2a2f36;border-radius:999px;background:#0e1013;font-size:13px;line-height:1.4}
+.rd-pills--red li{color:#e02b20;border-color:rgba(224,43,32,.45);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.rd-steps ol{list-style:none;counter-reset:rd;margin:0;padding:0!important}
+.rd-steps li{counter-increment:rd;position:relative;padding-left:74px;min-height:56px;margin-bottom:22px}
+.rd-steps li::before{content:counter(rd);position:absolute;left:0;top:0;width:56px;height:56px;border-radius:50%;background:#e02b20;color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
+.rd-pills--lg ul{gap:10px}
+.rd-pills--lg li{font-size:15px;padding:9px 16px}
+.rd-pills--center ul{justify-content:center;gap:10px 26px}.rd-pills--center li{position:relative}.rd-pills--center li+li::before{content:'';position:absolute;left:-15px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:#64748b}
+.rd-phase{position:relative;text-align:center;padding-bottom:30px}.rd-phase p{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#d4d8dd;padding:0}.rd-phase::after{content:'';position:absolute;left:50%;bottom:0;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#e02b20;box-shadow:0 0 0 5px #000,0 0 0 7px #3a3f47;z-index:2}.rd-phase::before{content:'';position:absolute;left:-60%;right:-60%;bottom:10px;height:2px;background:#e02b20;z-index:1}.rd-phase--first::before{left:50%}.rd-phase--last::before{right:50%}@media (max-width:980px){.rd-phase::before{display:none}}
+.rd-label-lines p{display:flex;align-items:center;gap:18px;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#94a3b8;padding:0}.rd-label-lines p::before,.rd-label-lines p::after{content:'';flex:1;height:1px;background:#2a2f36}
+.rd-risk p:first-child{display:flex;align-items:center;gap:22px;font-size:62px;font-weight:800;line-height:1;letter-spacing:-.03em;color:#2a2f36;padding:0}.rd-risk p:first-child img{width:34px;height:34px;margin:0}.rd-risk h3{position:relative;margin-top:16px;padding-top:18px;font-size:18px;color:#fff}.rd-risk h3::before{content:'';position:absolute;left:0;top:0;width:30px;height:2px;background:#e02b20}
+.rd-acc{counter-increment:rdacc}.rd-acc--first{counter-reset:rdacc}.rd-acc .et_pb_toggle_title{display:flex;align-items:center;gap:22px}.rd-acc .et_pb_toggle_title::after{content:counter(rdacc,decimal-leading-zero);order:-1;position:static;font-family:inherit;color:#e02b20;font-weight:700;min-width:30px}.rd-acc .et_pb_toggle_content{padding-left:52px}
+.rd-check{background:#0b1220;border:1px solid #1e293b;border-radius:14px;padding:16px 20px;margin-top:16px}.rd-check p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#64748b;padding:0 0 6px}.rd-check table{width:100%;margin:0;border:0!important}.rd-check td{border:0!important;padding:8px 6px!important;font-family:ui-monospace,Consolas,monospace;font-size:13px;color:#d4d8dd}.rd-check td:last-child{text-align:right}.rd-check b{font-family:inherit;font-size:12px;font-weight:600;padding:3px 14px;border-radius:999px;border:1px solid}.rd-check .ok{color:#4ade80;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.12)}.rd-check .warn{color:#fbbf24;border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.12)}
+.rd-eyebrow p{display:flex;align-items:center;gap:14px;padding:0}.rd-eyebrow p::after{content:'';width:36px;height:1px;background:#e02b20}
+@media (max-width:767px){.rd-acc .et_pb_toggle_content{padding-left:0}}
+@media (max-width:767px){.rd-check{padding:12px 12px}.rd-check td{font-size:11.5px;padding:6px 3px!important}}
+.rd-level .et_pb_column{display:flex;flex-direction:column}.rd-level .et_pb_column>.et_pb_module:last-child{flex-grow:1}.rd-level--spread .et_pb_column:last-child>.et_pb_module{flex-grow:1}@media (max-width:980px){.rd-level .et_pb_column>.et_pb_module{flex-grow:0!important}}
+.rd-level .et_pb_column>.et_pb_image:last-child{display:flex;align-items:center;justify-content:center}@media (max-width:980px){.rd-level .et_pb_column>.et_pb_image:last-child{display:block}}
+/* end wp-builder-agent components */

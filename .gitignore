@@ -7,3 +7,6 @@ sites/*.json
 !sites/example.json
 scripts/__pycache__/
 sites/*/
+
+# plugin build output
+plugin/dist/

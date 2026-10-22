@@ -1,0 +1,30 @@
+.wpba-wrap h1 .wpba-site{font-size:13px;font-weight:400;color:#646970;margin-left:8px}
+.wpba-intro{max-width:860px}
+.wpba-panel{display:none;margin-top:16px}
+.wpba-panel.active{display:block}
+.wpba-card{background:#fff;border:1px solid #c3c4c7;border-radius:4px;padding:16px 20px;margin:0 0 16px;max-width:1100px}
+.wpba-card h2{margin-top:0;font-size:15px}
+.wpba-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:8px 0}
+.wpba-row label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#50575e}
+.wpba-row input[type=text],.wpba-row input[type=number],.wpba-row select{min-width:200px}
+.wpba-row input.wpba-wide{min-width:420px}
+.wpba-card textarea{width:100%;max-width:900px;font-family:Menlo,Consolas,monospace;font-size:12px}
+.wpba-confirm{border-left:4px solid #d63638;padding-left:10px}
+.wpba-out{background:#1d2327;color:#f0f0f1;font:12px/1.5 Menlo,Consolas,monospace;padding:12px;border-radius:4px;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto;margin-top:10px}
+.wpba-out:empty{display:none}
+.wpba-ok{color:#00a32a;font-weight:600}
+.wpba-fail{color:#d63638;font-weight:600}
+.wpba-muted{color:#646970}
+.wpba-plan{border:1px solid #dcdcde;border-radius:4px;padding:12px;background:#f6f7f7;margin-top:10px}
+.wpba-plan dt{font-weight:600;margin-top:6px}
+.wpba-plan dd{margin:2px 0 0 0}
+.wpba-plan ul{margin:4px 0 0 18px}
+table.wpba-table{border-collapse:collapse;width:100%;max-width:1000px;margin-top:8px}
+table.wpba-table th,table.wpba-table td{text-align:left;padding:6px 8px;border-bottom:1px solid #dcdcde;font-size:13px;vertical-align:top}
+table.wpba-table th{background:#f6f7f7}
+#wpba-iframes{position:absolute;left:-9999px;top:0;width:1440px;height:900px;overflow:hidden}
+#wpba-iframes iframe{width:1440px;height:900px;border:0}
+.wpba-busy{opacity:.6;pointer-events:none}
+.wpba-pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;background:#f0f0f1;color:#2c3338;margin-right:4px}
+.wpba-pill.on{background:#d7f3dd;color:#0a5d1f}
+.wpba-pill.off{background:#fde8e8;color:#8a1f1f}
