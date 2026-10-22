@@ -74,7 +74,7 @@ final class WPBA_OAuth {
 
 	/** /.well-known/oauth-protected-resource[/...] and /.well-known/oauth-authorization-server[/...] at the site root. */
 	public static function serve_well_known() {
-		$path = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) : '';
+		$path = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
 		$home = wp_parse_url( home_url(), PHP_URL_PATH );
 		if ( $home && '/' !== $home && 0 === strpos( $path, $home ) ) {
 			$path = substr( $path, strlen( $home ) );
@@ -92,7 +92,7 @@ final class WPBA_OAuth {
 		header( 'Content-Type: application/json; charset=utf-8' );
 		header( 'Access-Control-Allow-Origin: *' );
 		header( 'Cache-Control: no-store' );
-		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'OPTIONS' === $_SERVER['REQUEST_METHOD'] ) {
+		if ( 'OPTIONS' === self::method() ) {
 			header( 'Access-Control-Allow-Methods: GET, OPTIONS' );
 			header( 'Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Protocol-Version' );
 			exit;
@@ -208,7 +208,7 @@ final class WPBA_OAuth {
 	private static function bearer_from_request( WP_REST_Request $r ) {
 		$auth = $r->get_header( 'authorization' );
 		if ( ! $auth && isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ) {
-			$auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION']; // Apache CGI/FastCGI keeps it here
+			$auth = sanitize_text_field( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ); // Apache CGI/FastCGI keeps it here
 		}
 		if ( $auth && preg_match( '/^Bearer\s+(\S+)$/i', trim( $auth ), $m ) ) {
 			return $m[1];
@@ -355,8 +355,21 @@ final class WPBA_OAuth {
 
 	// --- authorize (consent screen, admin-post.php) -----------------------------------------------------
 
+	private static function method() {
+		return isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : 'GET';
+	}
+
+	/** Send the browser to a client's registered redirect URI (validated against the registration above). */
+	private static function redirect_to_client( $url ) {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		add_filter( 'allowed_redirect_hosts', function ( $hosts ) use ( $host ) { $hosts[] = $host; return $hosts; } );
+		wp_safe_redirect( $url );
+		exit;
+	}
+
 	public static function authorize_login_redirect() {
-		$back = admin_url( 'admin-post.php?' . http_build_query( wp_unslash( $_GET ) ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth authorization request parameters; the consent form that follows is nonce-protected.
+		$back = admin_url( 'admin-post.php?' . http_build_query( array_map( 'sanitize_text_field', wp_unslash( $_GET ) ) ) );
 		wp_safe_redirect( wp_login_url( $back ) );
 		exit;
 	}
@@ -365,7 +378,8 @@ final class WPBA_OAuth {
 		if ( ! current_user_can( WPBA_Plugin::CAPABILITY ) ) {
 			wp_die( 'Only an administrator can connect Claude to this site.', 'WP Builder Agent', array( 'response' => 403 ) );
 		}
-		$q = wp_unslash( 'POST' === $_SERVER['REQUEST_METHOD'] ? $_POST : $_GET );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing -- OAuth authorization request; the POST (consent) branch below verifies the nonce.
+		$q = array_map( 'sanitize_text_field', wp_unslash( 'POST' === self::method() ? $_POST : $_GET ) );
 		$p = array();
 		foreach ( array( 'client_id', 'redirect_uri', 'state', 'code_challenge', 'code_challenge_method', 'scope', 'resource', 'response_type' ) as $k ) {
 			$p[ $k ] = isset( $q[ $k ] ) ? (string) $q[ $k ] : '';
@@ -379,8 +393,7 @@ final class WPBA_OAuth {
 		}
 		// From here on errors go back to the client, as OAuth says.
 		$fail = function ( $error, $desc ) use ( $p ) {
-			wp_redirect( add_query_arg( array( 'error' => $error, 'error_description' => rawurlencode( $desc ), 'state' => rawurlencode( $p['state'] ) ), $p['redirect_uri'] ) );
-			exit;
+			self::redirect_to_client( add_query_arg( array( 'error' => $error, 'error_description' => rawurlencode( $desc ), 'state' => rawurlencode( $p['state'] ) ), $p['redirect_uri'] ) );
 		};
 		if ( 'code' !== $p['response_type'] ) {
 			$fail( 'unsupported_response_type', 'response_type must be code' );
@@ -392,7 +405,7 @@ final class WPBA_OAuth {
 			$fail( 'invalid_target', 'resource must be ' . self::resource_uri() );
 		}
 
-		if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+		if ( 'POST' === self::method() ) {
 			check_admin_referer( self::CONSENT_ACTION );
 			if ( empty( $q['approve'] ) ) {
 				$fail( 'access_denied', 'The site owner declined' );
@@ -410,8 +423,7 @@ final class WPBA_OAuth {
 				),
 				self::CODE_TTL
 			);
-			wp_redirect( add_query_arg( array( 'code' => $code, 'state' => rawurlencode( $p['state'] ) ), $p['redirect_uri'] ) );
-			exit;
+			self::redirect_to_client( add_query_arg( array( 'code' => $code, 'state' => rawurlencode( $p['state'] ) ), $p['redirect_uri'] ) );
 		}
 		self::render_consent( $p, $client );
 		exit;

@@ -57,7 +57,7 @@ final class WPBA_Claude {
 
 		// A page design can take several minutes; don't let PHP's own limit cut the request short.
 		if ( function_exists( 'set_time_limit' ) ) {
-			@set_time_limit( 0 );
+			@set_time_limit( 0 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged, WordPress.PHP.NoSilencedErrors.Discouraged -- long Claude responses; admin-only request.
 		}
 		$response = wp_remote_post(
 			self::ENDPOINT,

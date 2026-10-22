@@ -23,6 +23,11 @@ WP Builder Agent is the WordPress-plugin form of the wp-builder-agent CLI, and a
 
 Connected through MCP, Claude does the planning itself and no API key is needed on the site. The admin screen and WP-CLI can also call the Claude API directly: add your API key under Builder Agent > Settings or define `WPBA_ANTHROPIC_API_KEY` in wp-config.php. Every call's token usage and cost is recorded.
 
+== Third-party services ==
+
+* **Anthropic Claude API** (https://api.anthropic.com). Used only when you add an API key under Settings and run a plan or rebuild from the admin screen or WP-CLI. The task text and the site data read for it (Divi settings, page layouts, site profile) are sent to Anthropic. Terms: https://www.anthropic.com/legal/consumer-terms and https://www.anthropic.com/legal/privacy. Connected through MCP instead, no data leaves the site except in response to your own Claude client's requests.
+* **Client ID metadata documents**: when an MCP client signs in with a client id that is an https URL, the plugin fetches that URL once to read the client's registered redirect URIs.
+
 == Installation ==
 
 1. Upload the plugin zip under Plugins > Add New > Upload Plugin, or copy the folder to wp-content/plugins/.

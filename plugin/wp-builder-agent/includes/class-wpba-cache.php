@@ -41,7 +41,7 @@ final class WPBA_Cache {
 			$cleared[] = 'wp_super_cache';
 		}
 		if ( has_action( 'litespeed_purge_all' ) ) {
-			do_action( 'litespeed_purge_all' );
+			do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- LiteSpeed Cache's own hook.
 			$cleared[] = 'litespeed';
 		}
 		if ( class_exists( 'autoptimizeCache' ) && method_exists( 'autoptimizeCache', 'clearall' ) ) {
