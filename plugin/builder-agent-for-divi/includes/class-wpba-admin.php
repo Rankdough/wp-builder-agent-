@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class WPBA_Admin {
 
-	const SLUG = 'wp-builder-agent';
+	const SLUG = 'builder-agent-for-divi';
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
@@ -18,7 +18,7 @@ final class WPBA_Admin {
 	}
 
 	public static function menu() {
-		add_menu_page( 'WP Builder Agent', 'Builder Agent', WPBA_Plugin::CAPABILITY, self::SLUG, array( __CLASS__, 'render' ), 'dashicons-hammer', 61 );
+		add_menu_page( 'Builder Agent for Divi', 'Builder Agent', WPBA_Plugin::CAPABILITY, self::SLUG, array( __CLASS__, 'render' ), 'dashicons-hammer', 61 );
 	}
 
 	public static function action_links( $links ) {
@@ -32,10 +32,10 @@ final class WPBA_Admin {
 			return;
 		}
 		if ( ! WPBA_Plugin::divi_present() ) {
-			echo '<div class="notice notice-warning"><p><strong>WP Builder Agent:</strong> Divi 4 is not active. The agent reads and writes Divi\'s own settings and layouts, so most commands will have nothing to work on.</p></div>';
+			echo '<div class="notice notice-warning"><p><strong>Builder Agent for Divi:</strong> Divi 4 is not active. The agent reads and writes Divi\'s own settings and layouts, so most commands will have nothing to work on.</p></div>';
 		}
 		if ( 'missing' === WPBA_Settings::key_source() ) {
-			echo '<div class="notice notice-info"><p><strong>WP Builder Agent:</strong> no Anthropic API key yet. Planning and rebuilds need one; snapshots, header glow, restyle and Custom CSS work without it.</p></div>';
+			echo '<div class="notice notice-info"><p><strong>Builder Agent for Divi:</strong> no Anthropic API key yet. Planning and rebuilds need one; snapshots, header glow, restyle and Custom CSS work without it.</p></div>';
 		}
 	}
 
@@ -79,7 +79,7 @@ final class WPBA_Admin {
 		);
 		?>
 		<div class="wrap wpba-wrap" id="wpba-app">
-			<h1>WP Builder Agent <small class="wpba-site"><?php echo esc_html( WPBA_Guard::site_name() ); ?></small></h1>
+			<h1>Builder Agent for Divi <small class="wpba-site"><?php echo esc_html( WPBA_Guard::site_name() ); ?></small></h1>
 			<p class="wpba-intro">Plans are shown before anything is saved. Every write backs up first, clears caches after, and is recorded as a run. Production writes need the site name typed as confirmation.</p>
 			<nav class="nav-tab-wrapper wpba-tabs">
 				<?php foreach ( $tabs as $id => $label ) : ?>

@@ -4,10 +4,10 @@
  * validation) can be tested with plain `php tests/php/run.php`. Nothing here touches a database.
  */
 define( 'ABSPATH', '/nonexistent/' );
-define( 'WPBA_DIR', dirname( __DIR__, 2 ) . '/plugin/wp-builder-agent/' );
-define( 'WPBA_URL', 'http://example.test/wp-content/plugins/wp-builder-agent/' );
+define( 'WPBA_DIR', dirname( __DIR__, 2 ) . '/plugin/builder-agent-for-divi/' );
+define( 'WPBA_URL', 'http://example.test/wp-content/plugins/builder-agent-for-divi/' );
 define( 'WPBA_VERSION', 'test' );
-define( 'WPBA_FILE', WPBA_DIR . 'wp-builder-agent.php' );
+define( 'WPBA_FILE', WPBA_DIR . 'builder-agent-for-divi.php' );
 define( 'WPBA_TEST_UPLOADS', sys_get_temp_dir() . '/wpba-test-uploads' );
 
 class WP_Error {

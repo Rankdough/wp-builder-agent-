@@ -52,7 +52,7 @@ final class WPBA_OAuth {
 			'authorization_servers'    => array( self::issuer() ),
 			'scopes_supported'         => array( 'wpba' ),
 			'bearer_methods_supported' => array( 'header' ),
-			'resource_name'            => get_bloginfo( 'name' ) . ' (WP Builder Agent)',
+			'resource_name'            => get_bloginfo( 'name' ) . ' (Builder Agent for Divi)',
 		);
 	}
 
@@ -376,7 +376,7 @@ final class WPBA_OAuth {
 
 	public static function authorize_screen() {
 		if ( ! current_user_can( WPBA_Plugin::CAPABILITY ) ) {
-			wp_die( 'Only an administrator can connect Claude to this site.', 'WP Builder Agent', array( 'response' => 403 ) );
+			wp_die( 'Only an administrator can connect Claude to this site.', 'Builder Agent for Divi', array( 'response' => 403 ) );
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing -- OAuth authorization request; the POST (consent) branch below verifies the nonce.
 		$q = array_map( 'sanitize_text_field', wp_unslash( 'POST' === self::method() ? $_POST : $_GET ) );
@@ -386,10 +386,10 @@ final class WPBA_OAuth {
 		}
 		$client = self::resolve_client( $p['client_id'] );
 		if ( is_wp_error( $client ) ) {
-			wp_die( esc_html( 'OAuth: ' . $client->get_error_message() ), 'WP Builder Agent', array( 'response' => 400 ) );
+			wp_die( esc_html( 'OAuth: ' . $client->get_error_message() ), 'Builder Agent for Divi', array( 'response' => 400 ) );
 		}
 		if ( ! in_array( $p['redirect_uri'], $client['redirect_uris'], true ) ) {
-			wp_die( 'OAuth: redirect_uri is not registered for this client.', 'WP Builder Agent', array( 'response' => 400 ) );
+			wp_die( 'OAuth: redirect_uri is not registered for this client.', 'Builder Agent for Divi', array( 'response' => 400 ) );
 		}
 		// From here on errors go back to the client, as OAuth says.
 		$fail = function ( $error, $desc ) use ( $p ) {
@@ -443,7 +443,7 @@ final class WPBA_OAuth {
 .muted{color:#646970;font-size:13px}code{background:#f6f7f7;padding:1px 5px;border-radius:3px}</style></head><body>
 <form class="card" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 <h1>Connect <?php echo esc_html( $name ); ?> to <?php echo esc_html( $site ); ?>?</h1>
-<p>This lets Claude use WP Builder Agent on this site as <strong><?php echo esc_html( wp_get_current_user()->user_login ); ?></strong>. It will be able to:</p>
+<p>This lets Claude use Builder Agent for Divi on this site as <strong><?php echo esc_html( wp_get_current_user()->user_login ); ?></strong>. It will be able to:</p>
 <ul><li>read Divi settings, page layouts and run records</li><li>propose and apply Customizer changes, rebuild pages into drafts, put drafts live, add CSS</li></ul>
 <p class="muted">Every write still backs up first and needs the site name <code><?php echo esc_html( $site ); ?></code> given as confirmation. You can revoke this connection any time under Builder Agent &gt; Connect Claude. Redirects to <code><?php echo esc_html( $host ); ?></code>.</p>
 <?php wp_nonce_field( self::CONSENT_ACTION ); ?>

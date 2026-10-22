@@ -1,4 +1,4 @@
-/* WP Builder Agent admin screen. Talks to the plugin's REST API; measures computed styles on the front end
+/* Builder Agent for Divi admin screen. Talks to the plugin's REST API; measures computed styles on the front end
    through a same-origin iframe (the browser is the only place a computed style can be read). */
 (function () {
 	'use strict';
@@ -349,7 +349,7 @@
 		c.appendChild(h('p', { html: 'MCP URL: <code id="wpba-mcp-url">' + esc(D.mcp_url) + '</code>' }));
 		var steps = h('ol', {}, [
 			h('li', { html: '<strong>claude.ai, Claude Desktop, Cowork:</strong> Customize &rsaquo; Connectors &rsaquo; Add custom connector. Paste the MCP URL. Choose <em>Sign in</em> (Claude registers itself and you approve on a WordPress consent screen), or choose fixed credentials and add a header <code>Authorization: Bearer &lt;token&gt;</code> with a connection token from below. Team and Enterprise: an Owner adds it under Organization settings &rsaquo; Connectors.' }),
-			h('li', { html: '<strong>Claude Code:</strong> <code>claude mcp add --transport http wp-builder-agent ' + esc(D.mcp_url) + '</code> then <code>/mcp</code> to sign in, or append <code>--header "Authorization: Bearer &lt;token&gt;"</code>.' }),
+			h('li', { html: '<strong>Claude Code:</strong> <code>claude mcp add --transport http builder-agent-for-divi ' + esc(D.mcp_url) + '</code> then <code>/mcp</code> to sign in, or append <code>--header "Authorization: Bearer &lt;token&gt;"</code>.' }),
 			h('li', { html: '<strong>Then ask Claude</strong>, e.g. "Check my site status and make all buttons 6px rounded." It will read, propose, ask you to confirm the site name <code>' + esc(D.site) + '</code>, apply and verify.' })
 		]);
 		c.appendChild(steps);
@@ -357,7 +357,7 @@
 		c.appendChild(h('p', { 'class': 'wpba-muted', text: 'WordPress Application Passwords (Users > Profile) also work as Basic auth for Claude Code. The Authorization header must reach PHP: some Apache hosts need the standard "RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]" line; the X-WPBA-Token header is accepted as a fallback.' }));
 		var label = h('input', { type: 'text', placeholder: 'Label, e.g. Claude Desktop' });
 		c.appendChild(h('div', { 'class': 'wpba-row' }, [h('label', {}, ['New connection token', label]), h('button', { 'class': 'button button-primary', text: 'Create token', onclick: function () {
-			busy(c, true); api('/tokens', 'POST', { label: label.value }).then(function (r) { out(o, 'Copy it now, it is shown once:\n\n' + r.token + '\n\nHeader:  Authorization: Bearer ' + r.token + '\nClaude Code:  claude mcp add --transport http wp-builder-agent ' + D.mcp_url + ' --header "Authorization: Bearer ' + r.token + '"'); refresh(); }).catch(function (e) { out(o, 'Error: ' + e.message, 'wpba-fail'); }).then(function () { busy(c, false); });
+			busy(c, true); api('/tokens', 'POST', { label: label.value }).then(function (r) { out(o, 'Copy it now, it is shown once:\n\n' + r.token + '\n\nHeader:  Authorization: Bearer ' + r.token + '\nClaude Code:  claude mcp add --transport http builder-agent-for-divi ' + D.mcp_url + ' --header "Authorization: Bearer ' + r.token + '"'); refresh(); }).catch(function (e) { out(o, 'Error: ' + e.message, 'wpba-fail'); }).then(function () { busy(c, false); });
 		} })]));
 		c.appendChild(o);
 		function refresh() {

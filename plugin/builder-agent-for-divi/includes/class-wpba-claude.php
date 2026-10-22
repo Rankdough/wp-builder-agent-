@@ -24,7 +24,7 @@ final class WPBA_Claude {
 	public static function messages( array $args ) {
 		$key = WPBA_Settings::api_key();
 		if ( ! $key ) {
-			return new WP_Error( 'wpba_no_key', 'No Anthropic API key. Add it under WP Builder Agent > Settings or define WPBA_ANTHROPIC_API_KEY in wp-config.php.' );
+			return new WP_Error( 'wpba_no_key', 'No Anthropic API key. Add it under Builder Agent for Divi > Settings or define WPBA_ANTHROPIC_API_KEY in wp-config.php.' );
 		}
 		$model  = $args['model'] ?? WPBA_Settings::get( 'model' );
 		$effort = $args['effort'] ?? WPBA_Settings::get( 'effort' );

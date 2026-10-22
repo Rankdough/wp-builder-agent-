@@ -1,7 +1,7 @@
 <?php
 /**
  * Component registry: every `rd-*` class defined in a component stylesheet (the plugin's assets/components/
- * folder, or the site's own uploads/wp-builder-agent/components/ folder) is allowed as a module css_class.
+ * folder, or the site's own uploads/builder-agent-for-divi/components/ folder) is allowed as a module css_class.
  * To add a component, write its CSS with an `rd-` class; nothing else can be smuggled in as a class.
  */
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,7 +17,7 @@ final class WPBA_Components {
 
 	public static function site_folder() {
 		$u = wp_upload_dir();
-		return trailingslashit( $u['basedir'] ) . 'wp-builder-agent/components/';
+		return trailingslashit( $u['basedir'] ) . 'builder-agent-for-divi/components/';
 	}
 
 	/** @return string[] stylesheet paths, shared assets first */

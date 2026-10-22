@@ -70,13 +70,13 @@ login form only. The browser runs visible by default so you can watch it; add `-
 
 Every run writes a folder under `runs/` with a JSON-lines log of every click and request, screenshots and backups.
 
-## WordPress plugin
+## WordPress plugin: Builder Agent for Divi
 
-The same agent, packaged as a WordPress plugin in [`plugin/wp-builder-agent/`](plugin/wp-builder-agent/).
+The same agent, packaged as a WordPress plugin in [`plugin/builder-agent-for-divi/`](plugin/builder-agent-for-divi/).
 
 **Driven from your Claude account.** The plugin is an MCP server. Add its URL once as a custom connector in
 claude.ai, Claude Desktop or Cowork (sign in through a WordPress consent screen, or paste a connection token as a
-header), or in Claude Code with `claude mcp add --transport http wp-builder-agent https://<site>/wp-json/wpba/v1/mcp`.
+header), or in Claude Code with `claude mcp add --transport http builder-agent-for-divi https://<site>/wp-json/wpba/v1/mcp`.
 From then on the Claude you talk to is the planner and the page designer: the tools hand it the same context and
 schemas the CLI gave the API (`get_plan_context`, `get_spec_schema`, `get_page_dump`), it writes the plan or spec,
 and the same validators check it before `apply_plan` or `rebuild_page` write anything. No API key is needed on the
@@ -112,7 +112,7 @@ CSS, WP Fastest Cache, WP Rocket, W3TC, WP Super Cache, LiteSpeed, Autoptimize).
 the admin page's browser, because that is the only place a computed style exists.
 
 ```bash
-plugin/build.sh                       # lint, run tests/php, zip -> plugin/dist/wp-builder-agent.zip
+plugin/build.sh                       # lint, run tests/php, zip -> plugin/dist/builder-agent-for-divi.zip
 php tests/php/run.php                 # the Python tests, ported (73 checks) + a render cross-check
 # Integration (what was run before release): WP-CLI commands, REST, the MCP endpoint over curl, the full OAuth
 # flow with a browser consent step, and a Playwright pass over the admin screen, on WordPress 7.1 + SQLite.

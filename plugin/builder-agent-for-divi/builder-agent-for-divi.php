@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name:       WP Builder Agent
- * Plugin URI:        https://github.com/Rankdough/wp-builder-agent-
- * Description:       Edits a Divi 4 site the way a careful human would: Customizer plans reviewed before they are applied, native-module page rebuilds into drafts, backups before every write, verification after. Runs inside WordPress, no browser automation needed.
+ * Plugin Name:       Builder Agent for Divi
+ * Plugin URI:        https://www.rankdough.com/builder-agent-for-divi/
+ * Description:       Edits a Divi 4 site the way a careful human would: plans reviewed before they are applied, native-module page rebuilds into drafts, backups before every write, verification after. Connects to Claude as an MCP server.
  * Version:           0.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Rank Dough
  * Author URI:        https://www.rankdough.com
- * License:           MIT
- * License URI:       https://opensource.org/licenses/MIT
- * Text Domain:       wp-builder-agent
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       builder-agent-for-divi
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

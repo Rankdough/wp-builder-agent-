@@ -3,7 +3,7 @@
  * New components the page designer may define while copying a design. Each is checked before it can be used:
  * every selector must start with its own rd- class (so it can't restyle anything else), no square brackets
  * (they break Divi shortcodes), no imports, no external URLs (only inline data: SVG), no fixed positioning or
- * script-like content. Accepted components are written to uploads/wp-builder-agent/components/<name>.css.
+ * script-like content. Accepted components are written to uploads/builder-agent-for-divi/components/<name>.css.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

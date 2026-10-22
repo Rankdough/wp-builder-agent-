@@ -1,4 +1,4 @@
-# WP Builder Agent: scope
+# Builder Agent for Divi: scope
 
 ## What it is
 
@@ -30,7 +30,7 @@ then writes it into a draft; `golive` copies the draft onto the live page.
 1. Install the zip (`plugin/build.sh` builds it) and activate. Open **Builder Agent** in the admin menu.
 2. Under **Connect Claude**, copy the MCP URL. In claude.ai or Claude Desktop: Customize > Connectors > Add custom
    connector, paste the URL, choose Sign in, approve on the WordPress screen. In Claude Code:
-   `claude mcp add --transport http wp-builder-agent <url>` then `/mcp`. Or create a connection token and add it as
+   `claude mcp add --transport http builder-agent-for-divi <url>` then `/mcp`. Or create a connection token and add it as
    the header `Authorization: Bearer <token>`.
 3. Under **Settings**, fill in the site profile (brand colours, hero glow, dark header colours).
 4. Ask Claude: "Take a snapshot, then make all buttons 6px rounded." Read the plan, confirm the site name, done.

@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/bootstrap.php';
-@mkdir( WPBA_TEST_UPLOADS . '/wp-builder-agent/components', 0777, true );
-array_map( 'unlink', glob( WPBA_TEST_UPLOADS . '/wp-builder-agent/components/*.css' ) ?: array() );
+@mkdir( WPBA_Components::site_folder(), 0777, true );
+array_map( 'unlink', glob( WPBA_Components::site_folder() . '*.css' ) ?: array() );
 
 function spec( array $modules, $structure = '4_4', $ncols = 1 ) {
 	$cols = array( array( 'modules' => $modules ) );

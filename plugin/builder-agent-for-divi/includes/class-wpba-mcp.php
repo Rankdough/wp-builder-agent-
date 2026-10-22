@@ -17,7 +17,7 @@ final class WPBA_MCP {
 	const DEFAULT_PROTOCOL  = '2025-06-18';
 
 	const INSTRUCTIONS = <<<'TXT'
-WP Builder Agent edits a Divi 4 WordPress site carefully. Rules the tools enforce and you should follow:
+Builder Agent for Divi edits a Divi 4 WordPress site carefully. Rules the tools enforce and you should follow:
 - Read before you write: site_status, get_plan_context or get_page_dump first.
 - Plans: write the plan yourself from get_plan_context (edit ladder: Customizer first, Custom CSS last),
   submit it with propose_plan (validated, nothing written), show it to the user, and only apply_plan after
@@ -92,7 +92,7 @@ TXT;
 				$result = array(
 					'protocolVersion' => in_array( $want, self::PROTOCOL_VERSIONS, true ) ? $want : self::DEFAULT_PROTOCOL,
 					'capabilities'    => array( 'tools' => array( 'listChanged' => false ) ),
-					'serverInfo'      => array( 'name' => 'wp-builder-agent', 'title' => 'WP Builder Agent (' . WPBA_Guard::site_name() . ')', 'version' => WPBA_VERSION ),
+					'serverInfo'      => array( 'name' => 'builder-agent-for-divi', 'title' => 'Builder Agent for Divi (' . WPBA_Guard::site_name() . ')', 'version' => WPBA_VERSION ),
 					'instructions'    => self::INSTRUCTIONS,
 				);
 				break;
