@@ -72,7 +72,11 @@ Every run writes a folder under `runs/` with a JSON-lines log of every click and
 
 ## WordPress plugin: Builder Agent for Divi
 
-The same agent, packaged as a WordPress plugin in [`plugin/builder-agent-for-divi/`](plugin/builder-agent-for-divi/).
+The same agent, packaged as the WordPress plugin **Builder Agent for Divi** in
+[`plugin/builder-agent-for-divi/`](plugin/builder-agent-for-divi/). Plugin homepage:
+[rankdough.com/builder-agent-for-divi](https://www.rankdough.com/builder-agent-for-divi/). Submitted to the
+WordPress.org plugin directory on 22 October 2026, awaiting review. Until it is listed, install the zip from
+`plugin/build.sh`.
 
 **Driven from your Claude account.** The plugin is an MCP server. Add its URL once as a custom connector in
 claude.ai, Claude Desktop or Cowork (sign in through a WordPress consent screen, or paste a connection token as a
