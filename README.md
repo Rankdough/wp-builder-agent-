@@ -70,6 +70,58 @@ login form only. The browser runs visible by default so you can watch it; add `-
 
 Every run writes a folder under `runs/` with a JSON-lines log of every click and request, screenshots and backups.
 
+## WordPress plugin: Builder Agent for Divi
+
+The same agent, packaged as a WordPress plugin in [`plugin/builder-agent-for-divi/`](plugin/builder-agent-for-divi/).
+
+**Driven from your Claude account.** The plugin is an MCP server. Add its URL once as a custom connector in
+claude.ai, Claude Desktop or Cowork (sign in through a WordPress consent screen, or paste a connection token as a
+header), or in Claude Code with `claude mcp add --transport http builder-agent-for-divi https://<site>/wp-json/wpba/v1/mcp`.
+From then on the Claude you talk to is the planner and the page designer: the tools hand it the same context and
+schemas the CLI gave the API (`get_plan_context`, `get_spec_schema`, `get_page_dump`), it writes the plan or spec,
+and the same validators check it before `apply_plan` or `rebuild_page` write anything. No API key is needed on the
+site in this mode. Every write still needs the site name as confirmation, backs up first and is recorded as a run.
+
+Authentication follows the MCP spec: OAuth 2.1 with dynamic client registration, PKCE, exact redirect-URI matching,
+short-lived access tokens with rotating refresh tokens, and tokens bound to this endpoint; or plain connection
+tokens made in the admin screen; or a WordPress Application Password. Running
+inside WordPress it needs no browser: it reads and writes the option Divi's Theme Options and Customizer write,
+works on page layouts in Divi's own shortcode format, and keeps every run (events, backups, plan, spec) as a
+private `wpba_run` record you can open from the admin screen or `wp wpagent runs`.
+
+| Python command | Plugin (admin screen tab / WP-CLI) | Notes |
+|---|---|---|
+| `snapshot` | Plan & apply > Snapshot / `wp wpagent snapshot` | Backs up Theme Options, global colours, Custom CSS and every page layout |
+| `plan` | Plan & apply / `wp wpagent plan "<task>"` | Structured output from Claude, validated against the site's real values |
+| `apply` / `rollback` | Plan & apply / `wp wpagent apply <run> --confirm-site=<host>` | Computed styles are measured in your browser (same-origin iframe) before and after |
+| `clone` | Page rebuilds / `wp wpagent clone <id>` | Copies the page and its meta into a draft |
+| `rebuild` | Page rebuilds / `wp wpagent rebuild <source> [draft]` | Reads the Code module from the stored layout; same spec validator and renderer, ported to PHP and cross-checked byte for byte |
+| `golive` | Page rebuilds / `wp wpagent golive <live> <draft>` | Live layout backed up; draft goes to Trash |
+| `theme-css` | CSS & components / `wp wpagent theme-css <file> --reason=...` | Marked block replaced in place, other CSS kept |
+| `header-glow` | Site-wide / `wp wpagent header-glow` | Dry run unless `--confirm-site` |
+| `restyle` | Site-wide / `wp wpagent restyle --theme=navy-red` | Dry run unless `--confirm-site`; pages whose visible text would change are skipped |
+| `components` | CSS & components / `wp wpagent components [--install]` | Registry reads `assets/components/*.css` plus `uploads/wp-builder-agent/components/` |
+
+**What stays the same.** The edit ladder, plan validation, the layout spec and its HTML allowlist, the component
+registry, the restyle roles, the glow rule, the CSS merge rule, the "confirm the site name" rule and the no-delete
+rule. The guard is now structural: the plugin has no code path to plugins, themes, users or WordPress settings.
+
+**What changed.** No Playwright, no `.env`: the API key lives in Settings or `WPBA_ANTHROPIC_API_KEY` in
+`wp-config.php`; the site profile lives in Settings. Caches are cleared through the plugins' own functions (Divi static
+CSS, WP Fastest Cache, WP Rocket, W3TC, WP Super Cache, LiteSpeed, Autoptimize). Computed-style verification runs in
+the admin page's browser, because that is the only place a computed style exists.
+
+```bash
+plugin/build.sh                       # lint, run tests/php, zip -> plugin/dist/builder-agent-for-divi.zip
+php tests/php/run.php                 # the Python tests, ported (73 checks) + a render cross-check
+# Integration (what was run before release): WP-CLI commands, REST, the MCP endpoint over curl, the full OAuth
+# flow with a browser consent step, and a Playwright pass over the admin screen, on WordPress 7.1 + SQLite.
+```
+
+Install the zip under Plugins > Add New > Upload, activate, open **Builder Agent** in the admin menu. Tested on
+WordPress 7.1 / PHP 8.3 with Divi's data shapes (the `et_divi` option, `_et_pb_use_builder` meta, `et_pb_layout`
+library posts); Divi 4 itself is needed on the site for the layouts to render.
+
 ## Claude API costs
 
 `plan` and `rebuild` call Claude (`claude-opus-5-5`). Each call prints its tokens and cost and adds them to
