@@ -24,6 +24,7 @@ final class WPBA_Plugin {
 	private function __construct() {
 		add_action( 'init', array( $this, 'register_post_type' ) );
 		add_action( 'rest_api_init', array( 'WPBA_Rest', 'register_routes' ) );
+		WPBA_OAuth::init();
 		if ( is_admin() ) {
 			WPBA_Admin::init();
 		}

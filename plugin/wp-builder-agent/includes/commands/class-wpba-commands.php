@@ -47,7 +47,7 @@ final class WPBA_Commands {
 	// --- plan (read-only) ----------------------------------------------------------------------------
 
 	/** Buttons on a page, from its stored layout: custom_button="on" means module-level styling. */
-	private static function page_buttons( $content ) {
+	public static function page_buttons( $content ) {
 		$out = array();
 		if ( preg_match_all( '/\[et_pb_button((?:\s+[a-z0-9_]+="[^"]*")*)\s*\]/', $content, $m ) ) {
 			foreach ( $m[1] as $attrs ) {

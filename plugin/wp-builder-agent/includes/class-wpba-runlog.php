@@ -57,13 +57,13 @@ final class WPBA_RunLog {
 	public function event( $type, array $data = array() ) {
 		$entry          = array_merge( array( 't' => gmdate( 'c' ), 'type' => $type ), $data );
 		$this->events[] = $entry;
-		update_post_meta( $this->id, '_wpba_events', $this->events );
+		update_post_meta( $this->id, '_wpba_events', wp_slash( $this->events ) );
 		return $entry;
 	}
 
 	/** Store a named JSON document (plan.json, context.json, spec.json ...). */
 	public function write_json( $name, $data ) {
-		update_post_meta( $this->id, '_wpba_file_' . sanitize_key( $name ), wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		update_post_meta( $this->id, '_wpba_file_' . sanitize_key( $name ), wp_slash( wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
 		$files = (array) get_post_meta( $this->id, '_wpba_files', true );
 		if ( ! in_array( $name, $files, true ) ) {
 			$files[] = $name;
@@ -78,7 +78,7 @@ final class WPBA_RunLog {
 
 	/** Store a backup taken before a write. Backups are kept raw so they can be restored byte for byte. */
 	public function backup( $name, $data ) {
-		update_post_meta( $this->id, '_wpba_backup_' . sanitize_key( $name ), is_string( $data ) ? $data : wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		update_post_meta( $this->id, '_wpba_backup_' . sanitize_key( $name ), wp_slash( is_string( $data ) ? $data : wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
 		$list = (array) get_post_meta( $this->id, '_wpba_backups', true );
 		if ( ! in_array( $name, $list, true ) ) {
 			$list[] = $name;

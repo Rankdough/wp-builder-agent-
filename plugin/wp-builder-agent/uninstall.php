@@ -7,7 +7,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-foreach ( array( 'wpba_settings', 'wpba_usage', 'wpba_site_profile' ) as $option ) {
+foreach ( array( 'wpba_settings', 'wpba_usage', 'wpba_site_profile', 'wpba_tokens', 'wpba_oauth_clients' ) as $option ) {
 	delete_option( $option );
 }
 

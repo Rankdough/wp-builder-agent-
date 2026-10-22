@@ -27,6 +27,20 @@ final class WPBA_Rest {
 		$r( '/components', 'GET', function () { return WPBA_Commands::components(); } );
 		$r( '/restyle/themes', 'GET', function () { return array_keys( WPBA_Restyle::themes() ); } );
 
+		// Connect Claude: the MCP endpoint, its OAuth endpoints, and token management for the admin screen.
+		WPBA_MCP::register_routes( $perm );
+		$r( '/connect', 'GET', array( __CLASS__, 'connect_info' ) );
+		$r( '/tokens', 'GET', function () { return WPBA_OAuth::list_tokens(); } );
+		$r( '/tokens', 'POST', function ( $q ) {
+			$j     = $q->get_json_params();
+			$label = sanitize_text_field( (string) ( $j['label'] ?? 'connection' ) );
+			$token = WPBA_OAuth::issue( 'connection', get_current_user_id(), array( 'label' => $label ) );
+			return array( 'token' => $token, 'label' => $label, 'note' => 'Shown once. Paste it as a request header: Authorization: Bearer <token>' );
+		} );
+		$r( '/tokens', 'DELETE', function ( $q ) { $j = $q->get_json_params(); WPBA_OAuth::revoke_hash( (string) ( $j['hash'] ?? '' ) ); return WPBA_OAuth::list_tokens(); } );
+		$r( '/oauth/clients', 'GET', function () { return WPBA_OAuth::list_clients(); } );
+		$r( '/oauth/clients', 'DELETE', function ( $q ) { $j = $q->get_json_params(); WPBA_OAuth::revoke_client( (string) ( $j['client_id'] ?? '' ) ); return WPBA_OAuth::list_clients(); } );
+
 		$r( '/snapshot', 'POST', function () { return self::out( WPBA_Commands::snapshot() ); } );
 		$r( '/plan', 'POST', function ( $q ) {
 			$j = $q->get_json_params();
@@ -77,6 +91,21 @@ final class WPBA_Rest {
 			$j = $q->get_json_params();
 			return self::out( WPBA_Commands::restyle( (string) ( $j['theme'] ?? '' ), $j['confirm_site'] ?? null, array_map( 'intval', (array) ( $j['only'] ?? array() ) ) ) );
 		} );
+	}
+
+	public static function connect_info() {
+		$mcp = WPBA_OAuth::resource_uri();
+		return array(
+			'mcp_url'          => $mcp,
+			'https'            => 0 === strpos( $mcp, 'https://' ),
+			'metadata_url'     => WPBA_OAuth::metadata_url(),
+			'authorize_url'    => admin_url( 'admin-post.php?action=' . WPBA_OAuth::CONSENT_ACTION ),
+			'claude_code'      => 'claude mcp add --transport http wp-builder-agent ' . $mcp,
+			'claude_code_token' => 'claude mcp add --transport http wp-builder-agent ' . $mcp . ' --header "Authorization: Bearer <token>"',
+			'tokens'           => WPBA_OAuth::list_tokens(),
+			'clients'          => WPBA_OAuth::list_clients(),
+			'tools'            => array_map( function ( $t ) { return $t['name']; }, WPBA_MCP_Tools::definitions() ),
+		);
 	}
 
 	public static function status() {

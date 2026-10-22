@@ -340,10 +340,48 @@
 		return p;
 	}
 
+	// ---- Connect Claude ------------------------------------------------------------------------------
+	function connectPanel() {
+		var p = h('div', { 'class': 'wpba-panel', id: 'wpba-connect' });
+		var c = h('div', { 'class': 'wpba-card' }); var o = h('div', { 'class': 'wpba-out' }); var lists = h('div', {});
+		c.appendChild(h('h2', { text: 'Connect Claude to this site' }));
+		c.appendChild(h('p', { html: 'The plugin is an <strong>MCP server</strong>. Add it to Claude once and the Claude you talk to does the planning and the page design itself, through the same validators and guard rails. No API key is needed in this mode.' }));
+		c.appendChild(h('p', { html: 'MCP URL: <code id="wpba-mcp-url">' + esc(D.mcp_url) + '</code>' }));
+		var steps = h('ol', {}, [
+			h('li', { html: '<strong>claude.ai, Claude Desktop, Cowork:</strong> Customize &rsaquo; Connectors &rsaquo; Add custom connector. Paste the MCP URL. Choose <em>Sign in</em> (Claude registers itself and you approve on a WordPress consent screen), or choose fixed credentials and add a header <code>Authorization: Bearer &lt;token&gt;</code> with a connection token from below. Team and Enterprise: an Owner adds it under Organization settings &rsaquo; Connectors.' }),
+			h('li', { html: '<strong>Claude Code:</strong> <code>claude mcp add --transport http wp-builder-agent ' + esc(D.mcp_url) + '</code> then <code>/mcp</code> to sign in, or append <code>--header "Authorization: Bearer &lt;token&gt;"</code>.' }),
+			h('li', { html: '<strong>Then ask Claude</strong>, e.g. "Check my site status and make all buttons 6px rounded." It will read, propose, ask you to confirm the site name <code>' + esc(D.site) + '</code>, apply and verify.' })
+		]);
+		c.appendChild(steps);
+		if (D.mcp_url.indexOf('https://') !== 0) { c.appendChild(h('p', { 'class': 'wpba-fail', text: 'This site is not on HTTPS. Claude\'s connectors need a public HTTPS URL; local or http sites only work with Claude Code on the same machine.' })); }
+		c.appendChild(h('p', { 'class': 'wpba-muted', text: 'WordPress Application Passwords (Users > Profile) also work as Basic auth for Claude Code. The Authorization header must reach PHP: some Apache hosts need the standard "RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]" line; the X-WPBA-Token header is accepted as a fallback.' }));
+		var label = h('input', { type: 'text', placeholder: 'Label, e.g. Claude Desktop' });
+		c.appendChild(h('div', { 'class': 'wpba-row' }, [h('label', {}, ['New connection token', label]), h('button', { 'class': 'button button-primary', text: 'Create token', onclick: function () {
+			busy(c, true); api('/tokens', 'POST', { label: label.value }).then(function (r) { out(o, 'Copy it now, it is shown once:\n\n' + r.token + '\n\nHeader:  Authorization: Bearer ' + r.token + '\nClaude Code:  claude mcp add --transport http wp-builder-agent ' + D.mcp_url + ' --header "Authorization: Bearer ' + r.token + '"'); refresh(); }).catch(function (e) { out(o, 'Error: ' + e.message, 'wpba-fail'); }).then(function () { busy(c, false); });
+		} })]));
+		c.appendChild(o);
+		function refresh() {
+			api('/connect').then(function (r) {
+				lists.innerHTML = '';
+				var t = h('table', { 'class': 'wpba-table' }, [h('tr', {}, ['Type', 'Label / client', 'User', 'Created', 'Expires', 'Last used', ''].map(function (x) { return h('th', { text: x }); }))]);
+				r.tokens.forEach(function (k) { t.appendChild(h('tr', {}, [h('td', { text: k.type }), h('td', { text: (k.label || k.client_id) + (k.prefix ? ' (' + k.prefix + '…)' : '') }), h('td', { text: k.user }), h('td', { text: k.created }), h('td', { text: k.expires }), h('td', { text: k.last_used }), h('td', {}, [h('a', { href: '#', text: 'revoke', onclick: function (e) { e.preventDefault(); api('/tokens', 'DELETE', { hash: k.hash }).then(refresh); } })])])); });
+				lists.appendChild(h('h3', { text: 'Tokens (' + r.tokens.length + ')' })); lists.appendChild(t);
+				var ct = h('table', { 'class': 'wpba-table' }, [h('tr', {}, ['Client', 'Client id', 'Redirects to', 'Registered', ''].map(function (x) { return h('th', { text: x }); }))]);
+				r.clients.forEach(function (k) { ct.appendChild(h('tr', {}, [h('td', { text: k.client_name }), h('td', { text: k.client_id }), h('td', { text: k.redirect_uris.join(', ') }), h('td', { text: k.created }), h('td', {}, [h('a', { href: '#', text: 'disconnect', onclick: function (e) { e.preventDefault(); api('/oauth/clients', 'DELETE', { client_id: k.client_id }).then(refresh); } })])])); });
+				lists.appendChild(h('h3', { text: 'Connected apps (' + r.clients.length + ')' })); lists.appendChild(ct);
+				lists.appendChild(h('p', { 'class': 'wpba-muted', text: 'Tools exposed: ' + r.tools.join(', ') }));
+			});
+		}
+		refresh();
+		c.appendChild(lists);
+		p.appendChild(c);
+		return p;
+	}
+
 	// ---- boot ---------------------------------------------------------------------------------------
 	panels.innerHTML = '';
-	tabs.plan = planPanel(); tabs.pages = pagesPanel(); tabs.sitewide = sitewidePanel(); tabs.css = cssPanel(); tabs.runs = runsPanel(); tabs.settings = settingsPanel();
+	tabs.connect = connectPanel(); tabs.plan = planPanel(); tabs.pages = pagesPanel(); tabs.sitewide = sitewidePanel(); tabs.css = cssPanel(); tabs.runs = runsPanel(); tabs.settings = settingsPanel();
 	Object.keys(tabs).forEach(function (k) { panels.appendChild(tabs[k]); });
 	var initial = (window.location.hash || '#plan').slice(1);
-	showTab(tabs[initial] ? initial : 'plan');
+	showTab(tabs[initial] ? initial : 'connect');
 })();

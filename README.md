@@ -72,7 +72,19 @@ Every run writes a folder under `runs/` with a JSON-lines log of every click and
 
 ## WordPress plugin
 
-The same agent, packaged as a WordPress plugin in [`plugin/wp-builder-agent/`](plugin/wp-builder-agent/). Running
+The same agent, packaged as a WordPress plugin in [`plugin/wp-builder-agent/`](plugin/wp-builder-agent/).
+
+**Driven from your Claude account.** The plugin is an MCP server. Add its URL once as a custom connector in
+claude.ai, Claude Desktop or Cowork (sign in through a WordPress consent screen, or paste a connection token as a
+header), or in Claude Code with `claude mcp add --transport http wp-builder-agent https://<site>/wp-json/wpba/v1/mcp`.
+From then on the Claude you talk to is the planner and the page designer: the tools hand it the same context and
+schemas the CLI gave the API (`get_plan_context`, `get_spec_schema`, `get_page_dump`), it writes the plan or spec,
+and the same validators check it before `apply_plan` or `rebuild_page` write anything. No API key is needed on the
+site in this mode. Every write still needs the site name as confirmation, backs up first and is recorded as a run.
+
+Authentication follows the MCP spec: OAuth 2.1 with dynamic client registration, PKCE, exact redirect-URI matching,
+short-lived access tokens with rotating refresh tokens, and tokens bound to this endpoint; or plain connection
+tokens made in the admin screen; or a WordPress Application Password. Running
 inside WordPress it needs no browser: it reads and writes the option Divi's Theme Options and Customizer write,
 works on page layouts in Divi's own shortcode format, and keeps every run (events, backups, plan, spec) as a
 private `wpba_run` record you can open from the admin screen or `wp wpagent runs`.
@@ -102,6 +114,8 @@ the admin page's browser, because that is the only place a computed style exists
 ```bash
 plugin/build.sh                       # lint, run tests/php, zip -> plugin/dist/wp-builder-agent.zip
 php tests/php/run.php                 # the Python tests, ported (73 checks) + a render cross-check
+# Integration (what was run before release): WP-CLI commands, REST, the MCP endpoint over curl, the full OAuth
+# flow with a browser consent step, and a Playwright pass over the admin screen, on WordPress 7.1 + SQLite.
 ```
 
 Install the zip under Plugins > Add New > Upload, activate, open **Builder Agent** in the admin menu. Tested on

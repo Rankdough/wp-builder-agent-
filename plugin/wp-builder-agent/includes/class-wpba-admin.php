@@ -59,6 +59,7 @@ final class WPBA_Admin {
 				'models'   => WPBA_Settings::MODELS,
 				'efforts'  => WPBA_Settings::EFFORT,
 				'themes'   => array_keys( WPBA_Restyle::themes() ),
+				'mcp_url'  => WPBA_OAuth::resource_uri(),
 			)
 		);
 	}
@@ -68,6 +69,7 @@ final class WPBA_Admin {
 			wp_die( 'Sorry, you are not allowed to access this page.' );
 		}
 		$tabs = array(
+			'connect'   => 'Connect Claude',
 			'plan'      => 'Plan & apply',
 			'pages'     => 'Page rebuilds',
 			'sitewide'  => 'Site-wide',
